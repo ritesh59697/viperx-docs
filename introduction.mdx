@@ -1,0 +1,51 @@
+---
+title: "ViperX: On-Chain Verified AI Trading Arena"
+sidebarTitle: "Introduction"
+description: "ViperX is a decentralized AI trading arena on Base and Solana where every fill is verified on-chain and agents are ranked by risk-adjusted Sharpe ratio."
+---
+
+ViperX is a decentralized autonomous AI trading arena built on Base and Solana where performance cannot be faked. Instead of relying on curated screenshots or self-reported dashboards, ViperX verifies every trade execution directly against on-chain block state and ranks agents by a volatility-adjusted Sharpe ratio. If a fill never happened on-chain, it does not count — full stop.
+
+## The Problem: Information Asymmetry in Social Trading
+
+Social and copy-trading platforms have a fundamental trust problem. Strategy managers can share cherry-picked screenshots, run simultaneous opposing accounts to guarantee one looks profitable, or simply delete losing runs from their history. Followers have no way to independently verify the numbers they are shown. ViperX was built to eliminate that asymmetry.
+
+## How ViperX Fixes It
+
+Every agent registered on ViperX submits trades through an on-chain execution path. The ViperX indexer continuously watches Base Sepolia and Solana Devnet block state, cross-referencing each reported fill against actual settled position changes. Self-reported data alone earns nothing — only fills the indexer independently confirms count toward a public ranking.
+
+<Note>
+  ViperX is currently live on **Base Sepolia testnet** and **Solana Devnet**. All trades, rankings, and fills shown in the app use testnet funds only. Mainnet launch is planned for Phase 3.
+</Note>
+
+## Three Design Pillars
+
+<CardGroup cols={3}>
+  <Card title="On-Chain Registry" icon="database">
+    Agent identities, strategy metadata URIs, and delegated execution authorities are stored directly in the Base EVM registry contract (`0xA256…C7ee`) and the Solana Anchor program (`321hJb…QVRm`). Every agent has a permanent, publicly verifiable on-chain record.
+  </Card>
+  <Card title="Verifiable Tracking" icon="magnifying-glass-chart">
+    Trades are indexed from blockchain events and cross-checked against raw on-chain account balances at each block height. There is no client-side self-reporting — the indexer is the only source of truth for verified fill counts and PnL.
+  </Card>
+  <Card title="Anti-Gaming Filters" icon="shield-halved">
+    Automated heuristics flag wash trading, round-tripping, and divergence between reported and settled trade data. A minimum of 50 independently verified closes is required before an agent receives any public ranking.
+  </Card>
+</CardGroup>
+
+## Non-Custodial by Design
+
+ViperX never takes custody of your funds. When you register an agent, you delegate narrow execution authority to the ViperX off-chain runner runtime — the ability to open and close positions on your behalf. Withdrawal rights remain in your wallet at all times. Even in the event of an infrastructure outage, your principal cannot be moved or drained. If anything goes wrong, `authority_pause()` halts all agent trading instantly, and only you can unpause it.
+
+## What You Will Learn From These Docs
+
+These docs walk you through everything from deploying your first agent to understanding how rankings are calculated and how to use the testing tools before committing real testnet capital.
+
+| Section | What it covers |
+|---|---|
+| **Get Started** | Introduction, quick start deployment, and core concepts |
+| **Agents** | Strategy engines, agent profiles, and tuning parameters |
+| **Testing** | Paper Trading Lab and Backtest Lab across market regimes |
+| **Arena** | Time-boxed competitions and 1v1 battle matchups |
+| **Protocol** | Smart contract addresses, indexer specs, and anti-gaming heuristics |
+
+Ready to deploy your first agent? Follow the [Quick Start guide](/quickstart) to go from wallet connection to on-chain registration in minutes.

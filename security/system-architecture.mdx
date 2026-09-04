@@ -1,0 +1,136 @@
+---
+title: "How ViperX Works: From Registry to Ranked Agent"
+sidebarTitle: "System Architecture"
+description: "Understand the five-stage pipeline that takes your agent from on-chain registration through autonomous trading to a publicly verified leaderboard rank."
+---
+
+ViperX separates strategy intelligence from custody, so you can deploy autonomous trading agents without trusting a centralised backend. Your vault stays in your control, your strategy config lives off-chain, and every trade the runtime executes on your behalf is independently verified by the indexer before it counts toward your leaderboard rank. This page walks through each stage of that pipeline from your perspective as an agent owner.
+
+<Note>
+  The entire architecture is designed to keep you in full control. At no stage does ViperX gain custody of your funds, the ability to withdraw your capital, or the power to override your wallet's authority over the vault.
+</Note>
+
+## The Five-Stage Pipeline
+
+<Steps>
+  <Step title="On-Chain Registry">
+    You deploy a trading vault and sign a single transaction that calls `register_agent` on the ViperX registry contract (Base Sepolia or Solana Devnet). This writes your agent identity, display name, and strategy metadata URI permanently to the blockchain.
+
+    Your vault address is recorded at this point — along with the cryptographic proof that your wallet owns it. You keep full custody throughout; the registry only stores your identity and strategy pointer, not your funds.
+
+    **What gets written on-chain:**
+    - Agent ID and display name
+    - Strategy metadata URI (pointing to your off-chain config)
+    - Vault address and ownership key
+  </Step>
+  <Step title="Narrow Delegation">
+    After registration, you sign a second transaction calling `delegate_authority`. This grants the ViperX off-chain runner the right to submit trade transactions and invoke circuit breakers on your behalf — nothing else.
+
+    Withdrawal permissions are never part of the delegation. The runtime cannot transfer tokens, drain your vault, or act outside the bounds of your configured strategy profile. If it tries, `authority_pause()` fires automatically.
+
+    **What the delegation grants:**
+    - Trade submission authority (open and close positions via DEXes)
+    - Circuit-breaker invocation (`authority_pause()`)
+
+    **What the delegation never grants:**
+    - Withdrawal rights
+    - Token transfer approvals
+    - Principal movement of any kind
+  </Step>
+  <Step title="Autonomous Trading">
+    With delegation active, the ViperX execution runtime polls your strategy on a 15-second tick cycle. At each tick, it fetches your strategy config from the off-chain URI, evaluates the current market state, and — if the strategy signals a trade — submits a signed transaction to the appropriate decentralised exchange.
+
+    Each executed fill is recorded on-chain via `record_trade`, creating an auditable trace of every position your agent opens and closes. The runtime operates continuously without manual input, stopping only if `authority_pause()` fires or your vault balance drops below the minimum trade threshold.
+
+    **Runtime behaviour per tick:**
+    - Fetches strategy config from your strategy URI
+    - Evaluates market conditions against strategy parameters
+    - Submits trade transactions to DEXes if signal conditions are met
+    - Records fill signatures on-chain via `record_trade`
+  </Step>
+  <Step title="Indexer Verification">
+    After each fill is recorded on-chain, the ViperX indexer independently verifies it. The indexer syncs blocks from Base Sepolia and Solana Devnet, then cross-references each self-reported fill against the actual settled position changes visible in on-chain account state.
+
+    A fill only counts toward your verified total if it passes all three anti-gaming heuristics:
+
+    | Heuristic | Rule |
+    |---|---|
+    | Position Delta Match | Claimed trade size must match on-chain asset delta within ±2% |
+    | Minimum Round-Trip | Open-to-close must be at least 10 seconds |
+    | Minimum Trade Size | Each fill must be at least $5 USD in notional value |
+
+    Fills that fail any check are excluded from your verified count and flagged in your agent's tuning log. An agent cannot game the system by looping `record_trade` calls without placing real orders — the indexer confirms everything against independent on-chain position state.
+  </Step>
+  <Step title="Leaderboard Ranking">
+    Once the indexer has confirmed 50 independently verified fills for your agent, it becomes eligible to appear on the public leaderboard. Your rank is calculated from a risk-adjusted Sharpe-like ratio derived entirely from your verified on-chain trade history and vault balance changes — not from self-reported PnL figures.
+
+    The ranking metric penalises maximum drawdown, so a lucky high-leverage bet cannot outrank consistent risk-managed performance. All inputs to the ranking calculation come from verified on-chain data that anyone can independently audit.
+
+    **Ranking inputs (all on-chain verified):**
+    - Realised PnL from verified fills
+    - Vault balance changes at each block
+    - Maximum drawdown over the agent's full history
+    - Volatility-adjusted Sharpe ratio calculation
+  </Step>
+</Steps>
+
+## Strategy URI and Off-Chain Metadata
+
+Your strategy configuration — parameters like tick window, RSI bounds, trade size, and grid spacing — lives off-chain at the URI you register. This can be an IPFS content hash or any publicly accessible URL. The execution runtime fetches this config at each tick to know how to trade.
+
+<Info>
+  Keeping strategy config off-chain gives you flexibility: you can update parameters without re-deploying your agent on-chain. The on-chain registry stores only the pointer (the URI), not the full config. The runtime always fetches the latest version of your config at each polling tick.
+</Info>
+
+Separating strategy intelligence from on-chain state is a deliberate design choice. It means your strategy logic is yours — not locked into a contract you cannot modify — while your custody and trade history remain permanently verifiable on-chain.
+
+## Full Architecture Diagram
+
+The diagram below shows how every component connects: from your wallet through the registry, runtime, DEXes, indexer, and out to the leaderboard.
+
+```text
+ +------------------+   (Delegate Authority)   +--------------------+
+ |   User Wallet    | -----------------------> | Agent Registry PDA |
+ | (Keeps Withdraw) |                          | (Base / Solana)    |
+ +------------------+                          +--------------------+
+          |                                             |
+          | (Submit Strategy Config)                    |
+          v                                             v
+ +------------------+   (Fetches strategy config) +--------------------+
+ |   Strategy URI   | <------------------------- | Execution Runtime  |
+ | (Off-chain IPFS) |                             | (Checks ticks)     |
+ +------------------+                             +--------------------+
+                                                           |
+                                                (Triggers trade fills)
+                                                           v
+ +------------------+   (Verifies & compares fills) +--------------------+
+ |  ViperX Indexer  | <------------------------- | Decentralized DEXs |
+ | (Postgres Cache) |                             | (On-chain ledger)  |
+ +------------------+                             +--------------------+
+          |
+          | (Enforce 50 verified closes limit)
+          v
+ +------------------+
+ |    Leaderboard   |
+ |  (Sharpe Rank)   |
+ +------------------+
+```
+
+## Why This Design
+
+Traditional copy-trading and performance-tracking platforms rely on centralised databases that managers can modify, selectively delete, or spoof with opposing accounts. ViperX eliminates those trust assumptions by anchoring every meaningful event — agent registration, trade fill, authority delegation, circuit-breaker invocation — to a public blockchain.
+
+<CardGroup cols={2}>
+  <Card title="Custody stays with you" icon="lock">
+    Separating execution authority from withdrawal rights means the runtime can trade autonomously on your behalf without ever touching your principal. You remain the only party who can move funds.
+  </Card>
+  <Card title="Rankings are manipulation-resistant" icon="shield-check">
+    Because the indexer independently verifies fills against settled on-chain state, no agent can inflate its record through fake trades, database edits, or looped contract calls.
+  </Card>
+  <Card title="Strategy logic is portable" icon="arrow-right-arrow-left">
+    Storing strategy config off-chain at a URI you control means you can iterate on your parameters without on-chain transactions. The contract stores ownership and history; you own the intelligence.
+  </Card>
+  <Card title="Failure is safe by default" icon="circle-exclamation">
+    If ViperX infrastructure goes offline, `authority_pause()` fires and execution halts. Your vault balance is unaffected. You can withdraw at any time regardless of system state.
+  </Card>
+</CardGroup>

@@ -1,0 +1,170 @@
+---
+title: "Monitor Your Agents from the ViperX Dashboard"
+sidebarTitle: "Dashboard"
+description: "Monitor agent ROI, Sharpe ratio, and drawdown, read the PnL trajectory chart, tune strategy parameters, and verify on-chain fills from one workspace."
+---
+
+The Wallet Dashboard is your central workspace for everything that happens after an agent is deployed. Connect your wallet and the dashboard assembles a live view of all your registered agents — both EVM agents on Base Sepolia and SVM agents on Solana Devnet — alongside any active copy subscriptions. From here you can inspect real-time performance metrics, read the tuning log, adjust strategy parameters, and jump directly to on-chain transaction records.
+
+## Connecting Your Wallet
+
+To initialize the dashboard, click **Connect** in the top-right corner of the page and approve the connection in your wallet. The dashboard reads your wallet address and fetches:
+
+- All agents registered under that address on Base Sepolia (EVM)
+- All agents registered under that address on Solana Devnet (SVM)
+- Any active copy subscriptions your agents are following
+
+<Note>
+  The dashboard is read-only by default. Connecting your wallet does not grant any spending permissions. Signing a transaction is only required when you choose to tune strategy parameters or register a new agent.
+</Note>
+
+If your wallet has no registered agents yet, the dashboard prompts you to deploy your first agent. See [Register and Deploy a Trading Agent](/agents/deploy) to get started.
+
+## Agent Cards
+
+Each deployed agent appears as a card in the dashboard. The card surfaces the most important performance indicators at a glance:
+
+<CardGroup cols={2}>
+  <Card title="EVM Agents (Base Sepolia)" icon="ethereum">
+    Agents registered on the Base Sepolia registry contract at `0xA256D01Ca6e89c5B6bDf34F3dd68eBfF47f2C7ee`. Linked to BaseScan for on-chain verification.
+  </Card>
+  <Card title="SVM Agents (Solana Devnet)" icon="circle">
+    Agents registered via the Solana Anchor program at `321hJbttyyeZ8pzisiKB93a5XdopV2N6n2gtvwrdQVRm`. Linked to Solana Explorer for on-chain verification.
+  </Card>
+</CardGroup>
+
+Click any agent card to open its full profile page.
+
+## Agent Profile Metrics
+
+The agent profile page shows a comprehensive set of performance and status metrics, all sourced directly from verified on-chain data:
+
+| Metric | Description |
+|--------|-------------|
+| **ROI** | Return on investment as a percentage of the vault's starting balance, calculated from closed positions only |
+| **Sharpe-Like Ratio** | Volatility-adjusted return score; higher is better. This is the metric used to rank agents on the leaderboard |
+| **Max Drawdown** | The largest peak-to-trough equity decline in the agent's history, expressed as a percentage |
+| **Realized PnL** | Cumulative profit and loss across all closed positions, denominated in USD |
+| **Verified Fills** | The number of trades independently confirmed by the ViperX indexer against on-chain position state |
+| **Vault Balance** | Current balance held in the agent's associated vault address |
+| **Active Copiers** | The number of other agents currently mirroring this agent's strategy (Phase 2) |
+| **Anti-Gaming Status** | Whether the agent has triggered any wash-trading or heuristic flags |
+
+<Info>
+  Metrics are sourced from the ViperX indexer, which syncs blocks continuously and cross-references self-reported fills against independent on-chain settled position changes. You are always looking at verified data, not self-reported statistics.
+</Info>
+
+### Skills Badges
+
+Beneath the core metrics, the profile displays any **Skills** badges the agent has earned:
+
+- **Proven Track Record** — 50 or more verified real trades
+- **Disciplined** — Sharpe-like ratio above 1.0 with 20 or more real trades
+- **Risk-Aware** — Max drawdown below 10% with 20 or more real trades
+
+Badges update automatically as the indexer processes new verified fills. See the [Parameters Reference](/agents/parameters) for the full badge unlock criteria.
+
+## Performance Trajectory Chart
+
+The **Performance Trajectory** section of the profile displays a time-series chart of your agent's PnL history, built from periodic on-chain snapshots taken by the indexer.
+
+<Accordion title="How to read the Performance Trajectory chart">
+  - **X-axis** — time, with each data point representing a PnL snapshot recorded by the indexer at a specific block height
+  - **Y-axis** — value in USD (Realized PnL) or percentage (ROI / Max Drawdown), depending on which metric you have selected
+  - **Toggle** — use the **Realized PnL / ROI / Max Drawdown** toggle above the chart to switch between views
+  - **Trend line** — a rising line indicates cumulative realized gains; a flat line means no new positions have closed since the last snapshot
+  - **Snapshot count** — the label (e.g. "63 snapshots") tells you how many data points are plotted; more snapshots mean more trading history
+</Accordion>
+
+The chart does not include unrealized PnL from open positions. It only reflects closed trades that have settled on-chain, giving you a conservative and auditable performance picture.
+
+## Tuning Log
+
+The **Tuning Log** records every parameter change made to your agent since deployment. Each entry shows:
+
+- **Parameter name** — the field that was changed (e.g. `rsiLowerThreshold`, `sizeUsd`)
+- **Previous value** — the value before the change
+- **Adjusted value** — the new value applied
+- **Timestamp** — when the change took effect
+- **Reason** — a text note explaining the adjustment (automatically generated for system-triggered changes, or written by you for manual tunings)
+
+The Tuning Log is immutable and publicly visible. Both automatic runtime adjustments and your own manual tunings appear in the same feed, giving followers and auditors a complete picture of how the agent's strategy has evolved over time.
+
+## Tuning Strategy Parameters
+
+To adjust your agent's strategy parameters after deployment:
+
+<Steps>
+  <Step title="Open the Agent Profile">
+    From the dashboard, click the agent card you want to tune. This opens the full profile page.
+  </Step>
+  <Step title="Click Tune Strategy">
+    Select the **Tune Strategy** button near the top of the profile. This opens the parameter editor, pre-filled with your agent's current values.
+  </Step>
+  <Step title="Adjust Parameters">
+    Modify any tunable parameter — window size, threshold or RSI bounds, trade size, or strategy URI. See the [Parameters Reference](/agents/parameters) for valid ranges and constraints.
+  </Step>
+  <Step title="Sign and Confirm">
+    Click **Save Changes** and sign the transaction in your wallet. The new parameters take effect on the next execution tick (within 15 seconds). The change is recorded in the Tuning Log automatically.
+  </Step>
+</Steps>
+
+<Warning>
+  Only the vault owner address can tune strategy parameters. If you set a custom Vault Address at registration, you must connect that wallet to make changes.
+</Warning>
+
+## Copy This Agent
+
+The **Copy This Agent** button on your agent's profile is the entry point for ViperX's social copy-trading feature. When activated, it allows other users to subscribe to your agent's strategy, mirroring your trades proportionally in their own vault.
+
+<Info>
+  Copy-trading, vault delegation, and performance fee splits are launching in **Phase 2**. The button is visible now so early agents can establish their track records ahead of the marketplace launch. See the [Roadmap](/introduction#roadmap) for Phase 2 timeline details.
+</Info>
+
+## On-Chain Verification Links
+
+Every agent profile includes an **Explorer** link that opens the registry entry on the appropriate block explorer:
+
+<Tabs>
+  <Tab title="Base Sepolia Agents">
+    Click the **Explorer** button on your agent's profile to open BaseScan Sepolia at the registry contract address. From there you can inspect:
+
+    - The registration transaction that created your agent
+    - Each `record_trade` call submitted by the execution runtime
+    - Your vault address and its on-chain balance
+
+    Direct link format:
+    ```text
+    https://sepolia.basescan.org/address/<your-wallet-address>
+    ```
+  </Tab>
+  <Tab title="Solana Devnet Agents">
+    Click the **Explorer** button on your agent's profile to open Solana Explorer (Devnet cluster) at your agent's PDA. From there you can inspect:
+
+    - The PDA account data storing your agent's registry record
+    - Individual trade transaction signatures with full instruction data
+    - Your vault account and current balance
+
+    Direct link format:
+    ```text
+    https://explorer.solana.com/address/<your-agent-pda>?cluster=devnet
+    ```
+  </Tab>
+</Tabs>
+
+## Quick Navigation
+
+<CardGroup cols={2}>
+  <Card title="Deploy an Agent" icon="rocket" href="/agents/deploy">
+    Register a new agent on Base Sepolia or Solana Devnet in a single transaction.
+  </Card>
+  <Card title="Strategy Engines" icon="sliders" href="/agents/strategy-engines">
+    Learn how each built-in strategy engine works and which markets it suits.
+  </Card>
+  <Card title="Parameters Reference" icon="list" href="/agents/parameters">
+    Full reference for every registration field, strategy parameter, and skills badge.
+  </Card>
+  <Card title="Leaderboard" icon="trophy" href="/leaderboard">
+    See how your agent ranks against others by Sharpe-like ratio.
+  </Card>
+</CardGroup>

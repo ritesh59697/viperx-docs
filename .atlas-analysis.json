@@ -1,0 +1,87 @@
+{
+  "projectType": "saas",
+  "projectName": "ViperX",
+  "projectDescription": "ViperX is a decentralized autonomous AI trading arena where users register, deploy, and rank algorithmic trading agents on-chain using verifiable, wash-trade-resistant Sharpe-ratio scoring on Base and Solana.",
+  "theme": "luma",
+  "primaryColor": "#d0200a",
+  "lightColor": "#831304",
+  "darkColor": null,
+  "navigation": {
+    "tabs": [
+      {
+        "tab": "Documentation",
+        "groups": [
+          {
+            "group": "Get Started",
+            "pages": [
+              "introduction",
+              "quickstart",
+              "core-concepts"
+            ]
+          },
+          {
+            "group": "Deploying Agents",
+            "pages": [
+              "agents/deploy",
+              "agents/strategy-engines",
+              "agents/parameters",
+              "agents/dashboard"
+            ]
+          },
+          {
+            "group": "Testing & Validation",
+            "pages": [
+              "testing/paper-trading",
+              "testing/backtest-lab"
+            ]
+          },
+          {
+            "group": "Leaderboard & Arena",
+            "pages": [
+              "leaderboard/how-ranking-works",
+              "leaderboard/verified-fills",
+              "leaderboard/anti-gaming",
+              "leaderboard/arena"
+            ]
+          },
+          {
+            "group": "Security & Architecture",
+            "pages": [
+              "security/non-custodial-model",
+              "security/smart-contracts",
+              "security/system-architecture"
+            ]
+          },
+          {
+            "group": "Resources",
+            "pages": [
+              "roadmap",
+              "faq"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "keyFeatures": [
+    "On-chain agent registry on Base (EVM) and Solana (SVM)",
+    "Non-custodial vault delegation — withdrawal rights never leave the owner's wallet",
+    "Verifiable on-chain trade fills with 50-fill minimum for leaderboard eligibility",
+    "Risk-adjusted Sharpe-ratio leaderboard with drawdown penalties",
+    "Anti-gaming heuristics: wash-trade detection, PnL parity checks, minimum trade size",
+    "Strategy presets: Momentum Trend Follower, RSI Mean Reversion, Automated Grid Trading",
+    "Paper Trading Lab with $10,000 virtual balance for pre-deployment validation",
+    "Backtesting Lab with multiple market regime simulations",
+    "Time-boxed arena competitions with 1v1 agent battle matchups",
+    "Copy-trading and vault delegation marketplace (Phase 2 roadmap)"
+  ],
+  "publicApiSurface": [
+    "Agent Registry Contract (Base Sepolia): 0xA256D01Ca6e89c5B6bDf34F3dd68eBfF47f2C7ee",
+    "ViperX Registry Anchor Program (Solana Devnet): 321hJbttyyeZ8pzisiKB93a5XdopV2N6n2gtvwrdQVRm",
+    "record_trade — on-chain trade recording instruction",
+    "authority_pause() — emergency halt of agent execution",
+    "Strategy URI (IPFS/off-chain) — metadata link stored in registry PDA",
+    "Leaderboard API — Express JSON endpoint for metrics caching",
+    "PnL Indexer — EVM & SVM block watcher and verification indexer"
+  ]
+}

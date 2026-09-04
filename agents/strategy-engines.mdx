@@ -1,0 +1,188 @@
+---
+title: "Built-In Strategy Engines: Momentum, RSI, and Grid"
+sidebarTitle: "Strategy Engines"
+description: "Understand how ViperX's three quantitative strategy engines work, which market conditions suit each one, and how to tune parameters after deployment."
+---
+
+ViperX ships three quantitative strategy engines that run autonomously on behalf of your agent once deployed. Each engine embeds a distinct market hypothesis — directional momentum, mean reversion, or grid market-making — and translates that hypothesis into live buy and sell orders on decentralized exchanges. You select one engine at registration time and can fine-tune its parameters at any point afterwards from your agent's profile.
+
+<Tip>
+  Not sure which strategy fits current market conditions? Run your configurations through the [Backtest Lab](/testing/backtest-lab) before committing to a live deployment. The lab simulates performance across four distinct market regimes so you can see which engine performs best before any real capital is at risk.
+</Tip>
+
+## Strategy Engine Reference
+
+<Tabs>
+  <Tab title="Momentum Trend Follower">
+    ### Momentum Trend Follower
+
+    **Category:** Trend Following
+
+    The Momentum Trend Follower detects directional price momentum by analysing price movement across a rolling window of recent ticks. When the price change over the window exceeds a configurable threshold, the engine opens a long or short position in the direction of the move. Positions are closed when momentum reverses or the threshold is breached in the opposite direction.
+
+    This engine thrives when markets are making clear directional moves — sustained rallies or sell-offs where price continues in one direction long enough for the strategy to capture a portion of the trend. It underperforms in sideways, choppy markets where false breakouts generate repeated small losses.
+
+    #### Default Parameters
+
+    <ParamField body="Window" type="integer" default="20">
+      The number of price ticks analysed to detect momentum. A larger window smooths out noise but slows signal detection; a smaller window reacts faster but generates more false signals.
+
+      **Default:** 20 ticks
+    </ParamField>
+
+    <ParamField body="Threshold" type="float" default="0.50">
+      The minimum price change across the window, expressed in basis points (bps), required to trigger an entry. A move must exceed this threshold before the engine opens a position.
+
+      **Default:** 0.50% (50 bps)
+    </ParamField>
+
+    <ParamField body="Trade Size" type="float" default="20">
+      The notional USD size of each position opened by the engine.
+
+      **Default:** $20 USD
+    </ParamField>
+
+    #### Market Fit
+
+    | Condition | Performance |
+    |-----------|-------------|
+    | Strong uptrend | ✅ Excellent |
+    | Strong downtrend | ✅ Excellent |
+    | Sideways / choppy | ❌ Poor |
+    | Rangebound oscillation | ❌ Poor |
+
+    **Best for:** Trending markets with clear directional moves and sustained price momentum.
+  </Tab>
+
+  <Tab title="RSI Mean Reversion">
+    ### RSI Mean Reversion
+
+    **Category:** Range Trading
+
+    The RSI Mean Reversion engine calculates the Relative Strength Index (RSI) over a rolling window of ticks. It enters long positions when RSI drops to or below the lower bound — indicating the asset is oversold — and enters short positions when RSI rises to or above the upper bound — indicating the asset is overbought. Both positions target an exit when price reverts toward the mean.
+
+    This engine works best when price oscillates within a predictable range, repeatedly touching support and resistance levels. It struggles during strong trends, where RSI can stay in overbought or oversold territory for extended periods while the trend continues against the position.
+
+    #### Default Parameters
+
+    <ParamField body="RSI Window" type="integer" default="14">
+      The number of price ticks used to calculate the RSI value. A standard RSI window of 14 is the default; shorter windows make the indicator more reactive, longer windows make it more stable.
+
+      **Default:** 14 ticks
+    </ParamField>
+
+    <ParamField body="Lower Bound (Oversold)" type="float" default="35">
+      The RSI value at or below which the engine treats the asset as oversold and opens a long position. Lowering this threshold requires a deeper dip before entry, reducing trade frequency but increasing signal quality.
+
+      **Default:** RSI 35
+    </ParamField>
+
+    <ParamField body="Upper Bound (Overbought)" type="float" default="65">
+      The RSI value at or above which the engine treats the asset as overbought and opens a short position. Raising this threshold requires a more extreme spike before entry.
+
+      **Default:** RSI 65
+    </ParamField>
+
+    <ParamField body="Trade Size" type="float" default="25">
+      The notional USD size of each position opened by the engine.
+
+      **Default:** $25 USD
+    </ParamField>
+
+    #### Market Fit
+
+    | Condition | Performance |
+    |-----------|-------------|
+    | Rangebound / sideways | ✅ Excellent |
+    | Oscillating price action | ✅ Excellent |
+    | Strong uptrend | ❌ Poor |
+    | Strong downtrend | ❌ Poor |
+
+    **Best for:** Ranging and sideways markets with oscillating price action between identifiable support and resistance levels.
+  </Tab>
+
+  <Tab title="Automated Grid Trading">
+    ### Automated Grid Trading
+
+    **Category:** Grid Market Maker
+
+    The Automated Grid Trading engine establishes a symmetric dynamic grid centred on the baseline market price at activation. The grid divides price space into evenly spaced levels using the configured spacing percentage. The engine continuously places buy orders below the current price and sell orders above it — buying low at each grid line and selling high at the next one, capturing the spread on every round-trip.
+
+    This engine performs best in choppy, low-directional markets where price oscillates up and down without a strong trend. In a strong trending market, price can move through grid levels without reversing, and the engine may accumulate a one-sided position.
+
+    #### Default Parameters
+
+    <ParamField body="Grid Spacing" type="float" default="0.30">
+      The percentage distance between each grid level, expressed in basis points. Tighter spacing increases trade frequency and captures smaller price movements; wider spacing reduces fills but captures larger swings.
+
+      **Default:** 0.30% (30 bps)
+    </ParamField>
+
+    <ParamField body="Grid Mode" type="string" default="Symmetric">
+      Determines how the grid is arranged around the baseline price. **Symmetric** mode places an equal number of buy and sell levels above and below the midpoint.
+
+      **Default:** Symmetric
+    </ParamField>
+
+    <ParamField body="Trade Size" type="float" default="30">
+      The notional USD size of each order placed at a grid level.
+
+      **Default:** $30 USD
+    </ParamField>
+
+    #### Market Fit
+
+    | Condition | Performance |
+    |-----------|-------------|
+    | Choppy / rangebound | ✅ Excellent |
+    | Low directional bias | ✅ Excellent |
+    | Strong trending market | ❌ Poor |
+    | Flash crash / spike | ⚠️ Partial |
+
+    **Best for:** Choppy and rangebound markets with low directional bias where price oscillates within a predictable zone.
+  </Tab>
+</Tabs>
+
+## Testing Strategies Before Deployment
+
+Before committing to a live deployment, use the [Backtest Lab](/testing/backtest-lab) to simulate each strategy across historical market regimes:
+
+<CardGroup cols={2}>
+  <Card title="Bull Trend" icon="arrow-trend-up">
+    Simulates an upward trending market with standard crypto volatility. Momentum Trend Follower typically dominates here.
+  </Card>
+  <Card title="Bear Market" icon="arrow-trend-down">
+    Simulates a declining market with higher volatility and sharp panic moves. Tests short-side momentum performance.
+  </Card>
+  <Card title="Rangebound" icon="arrows-left-right">
+    Simulates oscillation between support and resistance. RSI Mean Reversion and Grid Trading typically excel here.
+  </Card>
+  <Card title="Flash Crash & Recovery" icon="bolt">
+    Simulates a stable period followed by a sudden 30% dump and V-shaped recovery. Tests drawdown resilience and recovery speed.
+  </Card>
+</CardGroup>
+
+After running backtests, you can carry your best-performing parameter configuration directly into the agent deployment form.
+
+## Tuning Strategy Parameters After Deployment
+
+Strategy parameters are not fixed at registration. You can adjust any tunable parameter at any time from your agent's profile page:
+
+1. Open your agent's profile from the [Wallet Dashboard](/agents/dashboard) or the [Leaderboard](/leaderboard).
+2. Click **Tune Strategy**.
+3. Adjust the parameters — window, threshold/bounds, or trade size — and confirm the update.
+4. Each change is recorded in the **Tuning Log** on your agent's profile, along with a timestamp and reason, creating a transparent audit trail.
+
+<Warning>
+  Changing parameters mid-run resets the engine's internal state. If you adjust the window or threshold significantly, monitor the first few trades after the update to confirm the engine is behaving as expected in current market conditions.
+</Warning>
+
+## Strategy URI
+
+When you register an agent, you can supply a **Strategy URI** — a URL pointing to a JSON file that stores extended off-chain metadata about your strategy. This might include a longer description, backtested performance statistics, risk disclosures, or author information.
+
+The Strategy URI is stored immutably in the registry contract at deployment and is publicly visible on your agent's profile. It is separate from the on-chain parameters and does not affect execution logic — it is metadata only.
+
+<Info>
+  In Phase 2, strategy metadata will be linkable to NFT records, allowing strategy authors to attach provenance and attribution to their configurations as the copy-trading marketplace launches.
+</Info>

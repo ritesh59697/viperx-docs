@@ -1,0 +1,126 @@
+---
+title: "Simulate Strategy Logic with the Paper Trading Lab"
+sidebarTitle: "Paper Trading"
+description: "Run your trading strategy against a live simulated price feed using a virtual $10,000 balance — no real capital, no on-chain transactions, zero risk."
+---
+
+The Paper Trading Lab lets you run any ViperX strategy engine against a real-time simulated price feed using a virtual **$10,000** balance. Nothing touches the blockchain and no real capital is at stake, making it the ideal first stop before you commit funds to Solana Devnet. Use it to verify that your chosen strategy parameters produce the behaviour you expect, watch key performance metrics update in real time, and build confidence before moving to the next stage of the deployment pipeline.
+
+## The Three-Stage Deployment Pipeline
+
+Every ViperX agent follows the same progression from safe simulation to verified live trading. Paper trading is Stage 1 — the safest way to start.
+
+<CardGroup cols={3}>
+  <Card title="① Paper Trading" icon="flask">
+    Simulated execution against a virtual $10,000 balance. No wallet required, no on-chain activity.
+  </Card>
+  <Card title="② Solana Devnet" icon="vial">
+    Real on-chain transactions using testnet tokens. Fills are indexed and count toward your 50-fill verification requirement.
+  </Card>
+  <Card title="③ Verified Live Performance" icon="chart-line">
+    Mainnet deployment with a public leaderboard ranking earned through 50+ independently verified fills.
+  </Card>
+</CardGroup>
+
+<Note>
+  Paper trades are **entirely off-chain simulations**. They do not count toward the 50 independently verified on-chain fills required for a leaderboard ranking. To start accumulating verified fills, deploy your agent to Solana Devnet (Stage 2).
+</Note>
+
+## How to Use the Paper Trading Lab
+
+<Steps>
+  <Step title="Choose a Strategy Engine">
+    Select one of the three available strategy engines from the **Strategy** dropdown:
+
+    <CardGroup cols={3}>
+      <Card title="Momentum Trend Follower" icon="arrow-trend-up">
+        Detects directional price momentum over a rolling window and opens long or short positions on threshold breakouts.
+      </Card>
+      <Card title="RSI Mean Reversion" icon="arrows-left-right">
+        Monitors the Relative Strength Index and buys oversold dips (RSI ≤ 35) while shorting overbought spikes (RSI ≥ 65).
+      </Card>
+      <Card title="Grid Market Maker" icon="grid">
+        Places automated buy-low and sell-high orders across a dynamic grid around the current market price.
+      </Card>
+    </CardGroup>
+  </Step>
+
+  <Step title="Set Position Size (USD)">
+    Enter a **Position Size** in the USD field. This controls the notional value of each simulated order the strategy places. Start with a size that reflects what you plan to use on Devnet so that simulated results translate meaningfully.
+  </Step>
+
+  <Step title="Adjust Strategy Parameters">
+    Fine-tune the strategy-specific parameters that appear beneath the position size field:
+
+    <AccordionGroup>
+      <Accordion title="Momentum Trend Follower parameters">
+        | Parameter | Default | Description |
+        |-----------|---------|-------------|
+        | Window (ticks) | 20 | Number of price ticks used to calculate the rolling momentum signal |
+        | Threshold | 50 bps | Minimum price movement (in basis points) required to trigger an entry |
+      </Accordion>
+      <Accordion title="RSI Mean Reversion parameters">
+        | Parameter | Default | Description |
+        |-----------|---------|-------------|
+        | RSI Window (ticks) | 14 | Lookback period for the RSI calculation |
+        | Oversold Bound | 35 | RSI level below which a long entry is triggered |
+        | Overbought Bound | 65 | RSI level above which a short entry is triggered |
+      </Accordion>
+      <Accordion title="Grid Market Maker parameters">
+        | Parameter | Default | Description |
+        |-----------|---------|-------------|
+        | Grid Spacing | 30 bps | Price interval between each grid level |
+        | Grid Mode | Symmetric | Whether grid levels are placed symmetrically above and below the baseline |
+      </Accordion>
+    </AccordionGroup>
+  </Step>
+
+  <Step title="Click Start to Begin the Simulation">
+    Click **▶ Start** to begin the paper trading session. The strategy engine starts polling the simulated SOL-PERP price feed every 15 seconds — the same tick rate used by the live execution runtime — and places virtual orders whenever its signal conditions are met.
+  </Step>
+
+  <Step title="Monitor the Live Metrics Panel">
+    Watch the four key metrics update in real time as simulated trades execute:
+
+    <CardGroup cols={2}>
+      <Card title="Total Equity" icon="wallet">
+        The current value of your virtual portfolio, starting at $10,000 and fluctuating with open and closed positions.
+      </Card>
+      <Card title="Return %" icon="percent">
+        Percentage gain or loss relative to the $10,000 starting balance. A quick read on overall strategy profitability.
+      </Card>
+      <Card title="Trade Count" icon="receipt">
+        Total number of simulated fills executed since the session started. Aim for at least 50 before drawing conclusions.
+      </Card>
+      <Card title="Win Rate" icon="trophy">
+        Proportion of closed trades that ended in profit. Used alongside Return % to assess strategy consistency.
+      </Card>
+    </CardGroup>
+  </Step>
+
+  <Step title="Reset or Proceed">
+    - Click **Reset** at any time to wipe all session data and start fresh with a clean $10,000 balance — useful for testing a different parameter combination.
+    - When you're satisfied with the results, click **Deploy on Solana Devnet** to advance to Stage 2 of the pipeline and begin accumulating real verified fills.
+  </Step>
+</Steps>
+
+## What the Paper Trading Lab Does Not Validate
+
+Paper trading reproduces your strategy's signal logic faithfully, but it cannot replicate every condition you will encounter on-chain. Keep these limitations in mind before advancing to Devnet:
+
+<Warning>
+  The following real-world conditions are **not** modelled in the Paper Trading Lab. Always treat paper results as a directional signal, not a precise forecast of live performance.
+
+  - **Real slippage** — orders fill at the exact simulated price; live DEX fills will slip based on order book depth.
+  - **Liquidity constraints** — large position sizes may not fill completely in thin markets.
+  - **On-chain gas costs** — no transaction fees are charged during paper sessions; Devnet and Mainnet incur gas.
+  - **Fill latency** — the simulation assumes instant fills; live chain finality adds variable confirmation time.
+</Warning>
+
+## Supported Markets
+
+The Paper Trading Lab currently simulates the **SOL-PERP** perpetual market. Additional markets (BTC-PERP, ETH-PERP) are available in the [Backtest Lab](/testing/backtest-lab) and will be added to the Paper Lab in a future release.
+
+<Tip>
+  Run at least **50 paper trades** before advancing to Devnet. Fifty trades gives each strategy engine enough signal cycles to reveal edge cases — parameter settings that look great after 10 trades often degrade with more data. A larger sample also makes it easier to compare win rate and return consistency across different configurations.
+</Tip>

@@ -1,0 +1,92 @@
+---
+title: "ViperX Leaderboard Rankings: Risk-Adjusted Sharpe Score"
+sidebarTitle: "How Ranking Works"
+description: "Learn how ViperX ranks agents by volatility-adjusted Sharpe ratio with max drawdown penalties — not raw PnL, trade count, or self-reported stats."
+---
+
+The ViperX leaderboard exists to answer one question with proof rather than promises: which agents manage risk well enough to generate consistent returns? To do that, it ranks every eligible agent by a volatility-adjusted Sharpe-like ratio that penalizes drawdowns — so a single high-leverage gamble that happens to pay off cannot permanently sit above a disciplined strategy with a real track record.
+
+## What the Leaderboard Ranks
+
+Your agent's position on the leaderboard is determined by **risk-adjusted return**, not the size of your gains. The scoring formula combines two signals:
+
+- **Volatility-adjusted Sharpe ratio** — return divided by the standard deviation of that return stream, rewarding consistency over raw magnitude.
+- **Max drawdown penalty** — agents with large peak-to-trough equity drops are penalised, ensuring that a reckless strategy cannot paper over its worst moments with one lucky close.
+
+This means two agents with identical ROI can have dramatically different rankings. An agent that doubles its vault in a single high-leverage trade may show lower Sharpe than an agent that grew steadily at half the pace, because the explosive agent's drawdown inflates the denominator.
+
+<Note>
+  The **Pending** section at the bottom of the leaderboard shows every registered agent that has not yet reached the 50 verified fills threshold. These agents accumulate a score internally but remain ineligible for a public rank until they cross that line.
+</Note>
+
+## What the Leaderboard Does NOT Rank
+
+<Warning>
+  Self-reported claims written directly to the registry contract do **not** count toward your rank — on any metric. An agent's authority can call `record_trade` in a loop without ever placing a real order. Only fills independently confirmed by the ViperX indexer against on-chain position state are counted. Agents whose registry counters are far ahead of their verified fill count appear in the **Claimed vs. Verified** section of the leaderboard homepage with zero rank.
+</Warning>
+
+The leaderboard ignores:
+
+- **Raw PnL** — a large absolute dollar gain earned through extreme leverage is ranked lower than a smaller gain achieved with controlled risk.
+- **Number of trades** — volume does not improve your score; only the quality of confirmed fills matters.
+- **Self-reported registry stats** — registry claims are surfaced for transparency but carry no scoring weight.
+
+## Eligibility: 50 Verified Fills
+
+Before an agent receives any public ranking, it must accumulate **50 independently verified on-chain fills**. Each fill is a closed position confirmed by the ViperX indexer — not a self-reported counter. This threshold exists to build a statistically meaningful track record: a handful of lucky trades cannot bootstrap a misleading score.
+
+See [Verified Fills](/leaderboard/verified-fills) for a full explanation of how the indexer confirms each position close.
+
+## How the Score Is Calculated
+
+The ranking metric is a **volatility-adjusted Sharpe ratio with a max drawdown penalty** computed across all verified closed fills in the selected time window:
+
+1. Calculate the return series from each verified closed position.
+2. Divide the mean return by the standard deviation of that return series (Sharpe numerator / denominator).
+3. Apply a drawdown discount based on the worst peak-to-trough equity decline observed — deeper drawdowns reduce the final score.
+
+Agents that achieve high returns through consistent, low-volatility fills score near the top. Agents that achieved similar headline returns by risking catastrophic losses on the way score lower due to the drawdown penalty.
+
+## Why High-Leverage Gambles Can't Win
+
+Extreme leverage amplifies both gains and losses. Even if a highly leveraged agent ends a session in profit, the peak-to-trough drawdown it experienced during that session feeds directly into the drawdown penalty. A 50x-leveraged position that briefly dropped 30% before recovering will carry that 30% drawdown into the score — pulling the risk-adjusted ranking well below an agent that never dipped more than 2%.
+
+Agents caught using extreme leverage (exceeding 50× multiplier) are additionally flagged by the anti-gaming heuristics and publicly marked on the leaderboard. See [Anti-Gaming Heuristics](/leaderboard/anti-gaming) for details.
+
+## Time Filters
+
+Use the filter tabs at the top of the leaderboard to scope the scoring window:
+
+| Filter | What It Covers |
+|--------|---------------|
+| **24h** | Verified fills closed in the last 24 hours |
+| **7d** | Verified fills closed in the last 7 days |
+| **30d** | Verified fills closed in the last 30 days |
+| **All time** | Every verified fill since the agent was registered |
+
+Changing the time filter re-scores all agents using only the fills that fall within that window. An agent ranked first on the 7-day view may not hold that position on the All time view if its older fills had weaker risk-adjusted performance.
+
+## Leaderboard Column Definitions
+
+Every row in the ranked table exposes four core metrics alongside the agent name and owner:
+
+| Column | Definition |
+|--------|-----------|
+| **Trades** | Number of verified closed positions confirmed by the indexer. Does not include open positions or unconfirmed registry claims. |
+| **Sharpe** | The volatility-adjusted risk-return ratio computed from the verified fill series. Higher is better; negative values indicate the agent lost more than it gained on a risk-adjusted basis. |
+| **ROI** | Return on initial capital calculated from the net PnL of all closed positions. Expressed as a percentage of vault balance at deployment. |
+| **Max DD** | Peak-to-trough equity drawdown — the largest percentage decline from a running high before a new high was set. A value of 0.00% means the agent's equity never dipped below its entry point across verified fills. |
+
+## Live Example
+
+The current top-ranked agent on Base Sepolia demonstrates how the scoring works in practice:
+
+| # | Agent | Trades | Sharpe | ROI | Max DD |
+|---|-------|--------|--------|-----|--------|
+| 1 | RSI Mean Reversion (`mean-reversion-8863`) | 58 | 11.63 | 2.13% | 0.00% |
+
+This agent's Sharpe of **11.63** is exceptional — reflecting both positive returns and very low return volatility across its 58 verified fills. Its Max DD of **0.00%** means equity never declined below the starting vault balance, which also means no drawdown penalty is applied.
+
+## Flagged Agents
+
+Agents that trigger anti-gaming heuristics — for example, those detected using more than 50× leverage — are excluded from the ranked portion of the leaderboard entirely and marked with a public flag. The flag and the reason for exclusion are visible on the agent's profile page and on the main leaderboard page in the **Currently Flagged** section. Flagged agents remain registered; they simply receive no rank until the triggering condition is resolved.

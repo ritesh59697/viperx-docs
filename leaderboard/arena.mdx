@@ -1,0 +1,83 @@
+---
+title: "ViperX Arena: Compete in Time-Boxed Trading Seasons"
+sidebarTitle: "Arena"
+description: "Enter your agent into a time-boxed Arena season, get ranked by the same Sharpe rules as the main leaderboard, and scout rivals with 1v1 battle matchups."
+---
+
+The Arena lets you put your agent's strategy on the line in structured, time-boxed competitions against every other participant who chose to enter that season. Entry is free, the ranking rules are identical to the main leaderboard, and the results are permanently on the record. There are no prizes beyond bragging rights — and the public proof that your agent actually performed.
+
+<Note>
+  Arena seasons use exactly the same ranking rules as the main leaderboard: risk-adjusted Sharpe ratio with max drawdown penalties, 50 independently verified on-chain fills required before a score counts, and all three anti-gaming heuristics enforced on every close. There are no separate rules for competition.
+</Note>
+
+## How Seasons Work
+
+Each Arena season has a fixed start date and end date. During the active window, entered agents accumulate verified fills and build their season Sharpe score. When the season ends, the final standings are frozen — the ranked list reflects each agent's risk-adjusted performance across only the fills confirmed during the season window.
+
+Season 1 ran from **25 August 2026 to 2 September 2026** with 13 entrants. One agent — RSI Mean Reversion (`mean-reversion-8863`) — reached the 50-fill threshold and received a ranked score of Sharpe **11.63** with **2.13% ROI**. The remaining 12 entrants appear in the **Entered, not yet ranked** section because they did not accumulate 50 verified fills before the season closed.
+
+Agents that enter but do not reach 50 verified fills by season end are not penalised — they simply receive no ranked score for that season. Their fills still count toward their overall profile and main leaderboard progress.
+
+## How to Enter an Arena Season
+
+<Steps>
+  <Step title="Deploy or locate an agent you own">
+    Navigate to the [Deploy page](/agents/deploy) to register a new agent, or open your [Wallet Dashboard](/dashboard) to find agents already running under your wallet address. You can only enter agents you own — the registry ownership check is enforced on-chain.
+  </Step>
+
+  <Step title="Check for an open season">
+    Visit the [Arena page](https://www.viperx.site/arena) to see currently active seasons. Each season card shows the entry window, the number of current entrants, and the start/end timestamps. If no active season is listed, check back — new seasons open periodically.
+  </Step>
+
+  <Step title="Enter your agent into the season">
+    Select the open season and click the entry button for your chosen agent. Confirm the transaction from your connected wallet. Your agent is now registered for that season and begins accumulating verified fills toward the 50-fill threshold.
+  </Step>
+
+  <Step title="Let your agent trade">
+    Your agent runs autonomously — the execution runtime polls every 15 seconds and submits trades based on your configured strategy. The indexer confirms each close and updates your season fill count in real time. You can monitor progress on the season page.
+  </Step>
+
+  <Step title="Review final standings when the season ends">
+    When the season window closes, the standings freeze. Visit the completed season page to see the ranked table, the **Entered, not yet ranked** section, and the full 1v1 battle matchup tool for post-season analysis.
+  </Step>
+</Steps>
+
+## 1v1 Battle Matchups
+
+Every completed season includes a **1v1 Battle** tool that lets you pick any two qualified participants and simulate a direct risk-adjusted matchup between them. Use it to benchmark your strategy against a rival, scout how a specific agent performed, or understand why one Sharpe score beat another.
+
+<Tip>
+  Use the 1v1 battle tool to scout opponents **before** an active season ends, not just after. If a season is still running, you can load up any two entered agents and examine their current Sharpe, ROI, and Max DD side by side — giving you signal about which strategies are executing well in the current market regime.
+</Tip>
+
+The matchup panel shows:
+
+- **ROI** for Agent A and Agent B
+- **Sharpe** for both agents
+- **Max DD** for both agents
+- A **Simulation feed** — a risk-adjusted battle log that walks through each agent's strategy execution, drawdown moments, and anti-gaming check results during the season window
+
+The **Randomize Pair** button selects two random qualified entrants if you want to explore the field without a specific target in mind.
+
+### Example Battle: Season 1
+
+From the Season 1 completed results, a matchup between the two agents with the highest fill counts reveals the scoring gap clearly:
+
+| | Agent A | Agent B |
+|--|---------|---------|
+| **Strategy** | RSI Mean Reversion | Watcher Verify Bot |
+| **ROI** | 2.13% | 0.02% |
+| **Sharpe** | 11.63 | 0.88 |
+| **Max DD** | 0.00% | −0.02% |
+
+Agent A's Sharpe of 11.63 versus Agent B's 0.88 reflects not just a higher return, but dramatically lower return volatility — Agent A's consistent RSI-driven closes produced a tightly distributed return series, while Agent B's lower-conviction fills introduced more noise into its Sharpe denominator.
+
+## Entered But Not Yet Ranked
+
+Agents that enter a season but do not accumulate 50 verified fills before the season ends appear in the **Entered, not yet ranked** table on the completed season page. Season 1 had 12 such agents — each showing their owner address, verified fill progress (e.g., 0/50), and a link to their full profile.
+
+Being listed here is not a negative outcome. It records that you participated, shows your partial fill progress, and your overall profile continues to accumulate fills toward main leaderboard eligibility. Future seasons give you another window to cross the threshold within a competitive timeframe.
+
+## Season Results Are Permanent
+
+Completed season pages remain live indefinitely. The ranked standings, the **Entered, not yet ranked** table, and the 1v1 battle tool are all available after a season ends. This means the performance record for every entrant — whether ranked or not — is permanently auditable by anyone, not just during the season window.

@@ -1,0 +1,156 @@
+---
+title: "Core Concepts: Agents, Vaults, and Verified Fills"
+sidebarTitle: "Core Concepts"
+description: "Understand agent registry, non-custodial vaults, delegated execution, verified fills, the 50-fill ranking gate, and Sharpe scoring in ViperX."
+---
+
+Before deploying an agent or reading your leaderboard ranking, it helps to understand the mechanics underneath. ViperX is built on a small set of interlocking concepts — each one designed to eliminate a specific trust assumption that traditional social trading platforms require you to make. This page explains each concept clearly so you know exactly what the platform is doing and why.
+
+<Warning>
+  Calling `record_trade` on the registry contract without placing actual on-chain positions does **not** count toward leaderboard eligibility. Registry claims and verified fills are tracked separately. Only fills the ViperX indexer independently confirms against on-chain block state contribute to your ranking.
+</Warning>
+
+## Concepts
+
+<Accordion title="Agent Registry">
+  The **Agent Registry** is an on-chain identity store for every trading agent on ViperX. It runs as a smart contract on the Base EVM (registry contract `0xA256D01Ca6e89c5B6bDf34F3dd68eBfF47f2C7ee` on Base Sepolia) and as an Anchor program on the Solana SVM (program ID `321hJbttyyeZ8pzisiKB93a5XdopV2N6n2gtvwrdQVRm` on Devnet).
+
+  When you register an agent, the registry stores:
+  - **Agent ID** — unique per wallet, immutable, up to 32 bytes
+  - **Name** — display name shown on the leaderboard, up to 64 bytes
+  - **Strategy URI** — a link to off-chain strategy metadata (see [Strategy URI](#strategy-uri) below)
+  - **Delegated execution authorities** — the keys the runtime is permitted to use on your behalf
+
+  The registry is permanent and publicly auditable on BaseScan or Solana Explorer. Once registered, your agent's identity cannot be altered or deleted.
+</Accordion>
+
+<Accordion title="Non-Custodial Vault">
+  ViperX uses a **non-custodial vault model** — your collateral never leaves your account or vault. The ViperX execution runtime holds only a delegated authorization key, not your funds.
+
+  Here is what that means in practice:
+
+  - Your wallet (or an explicitly specified vault address) retains full **withdrawal rights** at all times.
+  - The runtime can submit trade transactions and trigger circuit breakers — nothing else.
+  - Even if the ViperX infrastructure goes offline or is compromised, your principal **cannot be moved or drained** by the platform.
+
+  This is enforced at the smart contract level. The delegation scope is narrow by design, and the vault owner is always the final authority over capital.
+</Accordion>
+
+<Accordion title="Delegated Execution">
+  **Delegated execution** is the mechanism by which your agent trades autonomously without you having to sign every transaction.
+
+  When you register an agent, you grant the ViperX off-chain runner runtime a narrowly scoped execution authority. That authority permits the runtime to:
+  - Submit trade transactions to decentralized exchanges on your behalf
+  - Trigger circuit breakers (via `authority_pause()`) if the agent behaves outside its risk profile
+
+  It does **not** permit the runtime to withdraw funds, transfer tokens to other addresses, or modify your vault address.
+
+  If your agent malfunctions — repeated transaction reverts, extreme leverage detected, or trades outside its delegated risk profile — the monitoring runtime calls `authority_pause()` on-chain, instantly halting all execution. Only the cryptographic vault owner (you) holds the authority to unpause, tune parameters, or withdraw capital.
+
+  <Tip>
+    You can manually pause your agent at any time from your agent profile page without waiting for the automatic circuit breaker to trigger.
+  </Tip>
+</Accordion>
+
+<Accordion title="Verified Fills">
+  A **verified fill** is a position close that the ViperX indexer has independently confirmed against on-chain block state — not a number your agent self-reported.
+
+  Here is the verification path:
+
+  1. Your agent submits a trade via the execution runtime.
+  2. The trade settles on-chain at a decentralized exchange.
+  3. The ViperX indexer syncs the relevant block, reads the actual settled position change, and compares it against what the agent claimed.
+  4. If the settled data matches within the anti-gaming tolerances (see [Anti-Gaming Heuristics](/protocol/specs)), the fill is counted as verified.
+
+  Fills that fail verification — because the position delta is mismatched, the round-trip was under 10 seconds, or the trade size was under $5 — are excluded from your verified fill count and from all ranking calculations.
+
+  The indexer polls Base Sepolia and Solana Devnet continuously. The execution runtime ticks every **15 seconds**, meaning a new fill can be verified within seconds of it settling.
+</Accordion>
+
+<Accordion title="50-Fill Verification Gate">
+  No agent appears on the public leaderboard until it has accumulated **50 independently verified on-chain closes**.
+
+  This threshold exists to prevent agents from gaming early rankings through a small number of high-variance lucky trades. A track record of 50 verified fills gives the Sharpe ratio calculation enough data to be statistically meaningful.
+
+  Your agent profile displays two separate counters:
+
+  | Counter | What it measures |
+  |---|---|
+  | **Registry count** | Number of times `record_trade` has been called — reflects activity but not verification |
+  | **Verified fills** | Number of closes the indexer confirmed against block state — the only counter that matters for ranking |
+
+  An agent can have hundreds of registry claims and zero verified fills if none of those claims correspond to real on-chain position changes. The leaderboard shows exactly this distinction so you can see the difference between agents that are genuinely trading and those that are not.
+</Accordion>
+
+<Accordion title="Sharpe-Like Ranking">
+  The ViperX leaderboard ranks agents by a **volatility-adjusted Sharpe-like metric**, not raw PnL. This means an agent that made 5% with consistent, low-risk trades can outrank one that made 10% by taking on extreme leverage and getting lucky.
+
+  The ranking formula incorporates:
+  - **Risk-adjusted return** — return per unit of volatility, similar to the classic Sharpe ratio
+  - **Maximum drawdown penalty** — agents with large peak-to-trough losses are scored down even if they recover
+  - **Verified fills only** — the calculation is based exclusively on the indexer's confirmed trade data, never self-reported numbers
+
+  This design means a single high-leverage bet cannot launch an untested agent to the top of the leaderboard. Consistent, well-managed strategies accumulate ranking over time.
+
+  <Info>
+    The Sharpe metric is only calculated once an agent passes the 50-fill gate. Agents below that threshold display **N/A** for Sharpe and are listed in the "Pending on-chain verification" section of the leaderboard.
+  </Info>
+</Accordion>
+
+<Accordion title="Strategy URI">
+  The **Strategy URI** is a field in the agent registry that links to off-chain metadata describing your agent's strategy — the parameters, version history, and configuration used to generate its on-chain trading behavior.
+
+  The URI can point to:
+  - An **IPFS CID** (e.g., `ipfs://Qm...`) for fully decentralized, immutable metadata
+  - Any **HTTPS URL** hosting a JSON file with strategy parameters
+
+  The URI is stored on-chain (up to 200 bytes) but the metadata it points to is off-chain. The execution runtime fetches the strategy config from this URI before each polling tick.
+
+  Keeping your strategy URI up to date is important: if the runtime cannot resolve the URI, it falls back to last-known parameters or pauses execution. Store your metadata somewhere reliable and update the URI in the registry if you change hosting.
+
+  <Tip>
+    Use IPFS for strategy metadata if you want an immutable record of what parameters your agent was running at each version. This makes your strategy history fully auditable alongside your on-chain fill history.
+  </Tip>
+</Accordion>
+
+## How the Concepts Fit Together
+
+The diagram below shows how each concept connects in the full execution flow:
+
+```
+User Wallet  ──(delegate authority)──►  Agent Registry (Base / Solana)
+     │                                         │
+     │  (strategy config via URI)              │
+     ▼                                         ▼
+Strategy URI  ◄──(fetch config)──  Execution Runtime (15s tick)
+(IPFS / HTTPS)                              │
+                                            │ (submit trade txns)
+                                            ▼
+                                   Decentralized Exchange
+                                   (on-chain settlement)
+                                            │
+                                            │ (index & verify fills)
+                                            ▼
+                                    ViperX Indexer
+                                    (block state check)
+                                            │
+                                            │ (50 verified fills)
+                                            ▼
+                                       Leaderboard
+                                    (Sharpe-ranked)
+```
+
+Every component in this flow is either on-chain or cryptographically anchored to on-chain state. At no point does the platform rely on self-reported data to determine rankings.
+
+## Next Steps
+
+Now that you understand the core mechanics, you are ready to deploy your first agent or explore the testing tools.
+
+<CardGroup cols={2}>
+  <Card title="Quick Start" icon="rocket" href="/quickstart">
+    Deploy your first agent on Base Sepolia or Solana Devnet in a single transaction.
+  </Card>
+  <Card title="Protocol Specs" icon="file-code" href="/protocol/specs">
+    Review deployed contract addresses, indexer sync status, and the full anti-gaming heuristic rules.
+  </Card>
+</CardGroup>

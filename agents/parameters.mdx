@@ -1,0 +1,138 @@
+---
+title: "Agent Parameters and Configuration Reference"
+sidebarTitle: "Parameters"
+description: "Complete reference for every registration field, tunable strategy parameter, and skills badge available on a ViperX trading agent."
+---
+
+Every ViperX agent is defined by two layers of configuration: registration parameters that are written to the on-chain registry at deploy time, and strategy parameters that govern how the execution engine trades. Some registration fields are immutable once set; strategy parameters can be adjusted at any time through the Tune Strategy interface on your agent's profile. This page is the authoritative reference for every field across both layers, plus the on-chain skills badges your agent can unlock.
+
+## Registration Parameters
+
+Registration parameters are submitted in the single transaction that creates your agent on the registry. Set these carefully — Agent ID is permanently immutable, and changes to other fields require a follow-up transaction.
+
+<ParamField body="Agent ID" type="string" required>
+  A unique identifier for your agent, scoped to your wallet address. No two agents from the same wallet can share an Agent ID. Once registered, the Agent ID cannot be changed.
+
+  - **Immutable:** Yes
+  - **Max length:** 32 bytes
+  - **Displayed:** On your agent profile and leaderboard row
+  - **Example:** `mean-reversion-8863`
+</ParamField>
+
+<ParamField body="Name" type="string" required>
+  A human-readable display name shown on the leaderboard, your agent profile, and in the trade history feed. Choose a name that represents your strategy clearly — other users will see it.
+
+  - **Immutable:** No (updatable post-deployment)
+  - **Max length:** 64 bytes
+  - **Example:** `RSI Mean Reversion`
+</ParamField>
+
+<ParamField body="Strategy URI" type="string">
+  A URL linking to an off-chain JSON file that holds extended strategy metadata — description, risk parameters, author information, or backtest results. The URI is stored in the registry and publicly visible on your profile.
+
+  - **Immutable:** No (updatable post-deployment)
+  - **Max length:** 200 bytes
+  - **Example:** `https://viperx.hub/strategies/mean-reversion-v1.json`
+</ParamField>
+
+<ParamField body="Vault Address" type="string">
+  The wallet or contract address that retains full ownership of collateral and withdrawal rights. The execution runtime can open and close trading positions but cannot move funds out of this address.
+
+  Leave blank to default to your currently connected wallet. If you specify a separate vault, ensure you control its private key — only the vault address can tune strategy parameters, withdraw funds, or unpause a halted agent.
+
+  - **Immutable:** No
+  - **Default:** Connected wallet address
+  - **Example:** `0x9f718b338Ccc69B6AC211Dc8239548E43095813a`
+</ParamField>
+
+<Note>
+  The ViperX app never receives custody or withdrawal authority over your vault. Delegation is narrowly scoped to trade execution and circuit-breaker invocation only. Even during an infrastructure outage, your principal cannot be moved or drained.
+</Note>
+
+## Strategy Parameters
+
+Strategy parameters control the trading logic of your selected engine. All strategy parameters are tunable after deployment via the **Tune Strategy** option on your agent's profile. Each change is logged in the Tuning Log with a timestamp.
+
+### Momentum Trend Follower Parameters
+
+| Parameter | Description | Default | Tunable |
+|-----------|-------------|---------|---------|
+| **Window** (ticks) | Number of recent price ticks analysed to measure directional momentum | 20 | ✅ Yes |
+| **Threshold** (bps) | Minimum price change over the window required to trigger an entry, in basis points | 50 bps (0.50%) | ✅ Yes |
+| **Trade Size** (USD) | Notional USD value of each position opened | $20 | ✅ Yes |
+
+### RSI Mean Reversion Parameters
+
+| Parameter | Description | Default | Tunable |
+|-----------|-------------|---------|---------|
+| **RSI Window** (ticks) | Number of ticks used to calculate the RSI value | 14 | ✅ Yes |
+| **Lower Bound** | RSI level at or below which the engine opens a long (oversold) position | 35 | ✅ Yes |
+| **Upper Bound** | RSI level at or above which the engine opens a short (overbought) position | 65 | ✅ Yes |
+| **Trade Size** (USD) | Notional USD value of each position opened | $25 | ✅ Yes |
+
+### Automated Grid Trading Parameters
+
+| Parameter | Description | Default | Tunable |
+|-----------|-------------|---------|---------|
+| **Grid Spacing** (bps) | Percentage distance between each grid level, in basis points | 30 bps (0.30%) | ✅ Yes |
+| **Grid Mode** | Layout of buy/sell orders around the baseline price | Symmetric | ✅ Yes |
+| **Trade Size** (USD) | Notional USD value of each order placed at a grid level | $30 | ✅ Yes |
+
+<Tip>
+  Before tuning live parameters, simulate the adjusted configuration in the [Backtest Lab](/testing/backtest-lab) to confirm the new values perform as expected across different market regimes.
+</Tip>
+
+## Anti-Gaming Heuristics
+
+Every trade your agent submits is evaluated against three automated heuristics before it counts toward your verified fill total and leaderboard rank. Trades that fail any check are excluded from Sharpe ratio calculations.
+
+| Heuristic | Rule | Threshold |
+|-----------|------|-----------|
+| **Position Delta Match** | The claimed trade size must match the actual on-chain asset delta within tolerance | ±2% |
+| **Minimum Round-Trip** | Trades that open and close in less than the minimum time are flagged as wash-trading simulations | 10 seconds |
+| **Minimum Trade Size** | Trades below the minimum notional size are excluded to prevent counter inflation | $5 USD |
+
+<Warning>
+  Agents that trip anti-gaming heuristics are flagged and excluded from leaderboard ranking. The ViperX indexer cross-references every fill against independent on-chain settled position state — self-reported trade counts do not affect verified fill totals.
+</Warning>
+
+## Agent Skills Badges
+
+Skills badges appear on your agent's public profile and signal verified achievements to other users. Each badge unlocks automatically once your agent meets the required on-chain criteria.
+
+<CardGroup cols={3}>
+  <Card title="Proven Track Record" icon="shield-check">
+    **Requirement:** 50 or more independently verified real on-chain trades.
+
+    Demonstrates your agent has built a meaningful execution history beyond the minimum leaderboard threshold.
+  </Card>
+  <Card title="Disciplined" icon="chart-line">
+    **Requirement:** Sharpe-like ratio above 1.0 with 20 or more real verified trades.
+
+    Demonstrates your agent consistently generates risk-adjusted returns, not just high-variance lucky wins.
+  </Card>
+  <Card title="Risk-Aware" icon="umbrella">
+    **Requirement:** Maximum drawdown below 10% with 20 or more real verified trades.
+
+    Demonstrates your agent manages downside risk effectively, preserving capital through adverse market conditions.
+  </Card>
+</CardGroup>
+
+<Info>
+  Skills badges are computed directly from on-chain verified data by the ViperX indexer. They cannot be self-awarded and update automatically as your agent's verified trade history grows.
+</Info>
+
+## Parameter Constraints Summary
+
+The table below lists hard constraints enforced by the registry contract and execution runtime:
+
+| Field | Type | Max Size / Constraint |
+|-------|------|-----------------------|
+| Agent ID | String | 32 bytes, unique per wallet, immutable |
+| Name | String | 64 bytes |
+| Strategy URI | String | 200 bytes |
+| Vault Address | Address | Valid EVM or SVM address |
+| Minimum Trade Size | USD | $5 (enforced by anti-gaming heuristic) |
+| Minimum Round-Trip | Time | 10 seconds (enforced by anti-gaming heuristic) |
+| Position Delta Tolerance | Percentage | ±2% (enforced by anti-gaming heuristic) |
+| Leaderboard Eligibility Threshold | Verified fills | 50 independently confirmed on-chain fills |

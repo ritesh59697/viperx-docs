@@ -1,0 +1,159 @@
+---
+title: "ViperX Smart Contract Addresses and On-Chain Ops"
+sidebarTitle: "Smart Contracts"
+description: "Find deployed registry contract addresses for Base Sepolia and Solana Devnet, verify your agent on-chain, and review key callable operations."
+---
+
+Every agent identity, strategy metadata URI, and delegated execution authority in ViperX is stored directly on-chain — not in a database you have to trust. This page lists the deployed registry contracts on both supported networks, explains the key operations you interact with, and shows you how to independently verify your agent's registration status using public block explorers.
+
+## Deployed Contracts
+
+<Tabs>
+  <Tab title="Base Sepolia">
+    ### ViperX Agent Registry Contract
+
+    The Base Sepolia registry is an EVM smart contract that stores agent identities, strategy metadata URIs, and the delegated execution authorities granted by vault owners. All agent registrations and trade records on the Base network are anchored to this contract.
+
+    ```text
+    0xA256D01Ca6e89c5B6bDf34F3dd68eBfF47f2C7ee
+    ```
+
+    | Field | Value |
+    |---|---|
+    | **Network** | Base Sepolia (Testnet) |
+    | **Contract Name** | ViperX Agent Registry Contract |
+    | **Purpose** | Stores agent identities, strategy metadata URIs, and delegated execution authorities |
+    | **Explorer** | [View on BaseScan](https://sepolia.basescan.org/address/0xA256D01Ca6e89c5B6bDf34F3dd68eBfF47f2C7ee) |
+
+    <Tip>
+      To verify your registration, open the BaseScan link above and search for your wallet address in the contract's transaction history. Your `register_agent` call will appear as an inbound transaction.
+    </Tip>
+  </Tab>
+  <Tab title="Solana Devnet">
+    ### ViperX Registry Anchor Program
+
+    The Solana Devnet registry is an Anchor program that handles PDA (Program Derived Address) creation, vault registration, and `record_trade` authority validation. Each agent on Solana gets a unique PDA that stores its identity and on-chain trade history.
+
+    ```text
+    321hJbttyyeZ8pzisiKB93a5XdopV2N6n2gtvwrdQVRm
+    ```
+
+    | Field | Value |
+    |---|---|
+    | **Network** | Solana Devnet |
+    | **Program Name** | ViperX Registry Anchor Program |
+    | **Purpose** | Handles PDA creation, vault registration, and `record_trade` authority validation |
+    | **Explorer** | [View on Solana Explorer](https://explorer.solana.com/address/321hJbttyyeZ8pzisiKB93a5XdopV2N6n2gtvwrdQVRm?cluster=devnet) |
+
+    <Tip>
+      To verify your agent on Solana, open the explorer link above and navigate to your agent's PDA address. The PDA is derived from your wallet pubkey and agent ID at registration time.
+    </Tip>
+  </Tab>
+</Tabs>
+
+## Key On-Chain Operations
+
+These are the four primary contract operations you interact with when using ViperX. Each call is signed by your wallet and verifiable on the respective block explorer.
+
+<AccordionGroup>
+  <Accordion title="register_agent — Write your agent identity to the registry">
+    Calling `register_agent` creates a permanent, immutable on-chain record for your agent. It stores your agent ID, display name, strategy metadata URI, and vault address in the registry contract.
+
+    **When it's called:** Once, when you deploy an agent from the [Create Agent](https://www.viperx.site/create) page.
+
+    **What it writes:**
+    - Agent ID (unique per wallet, up to 32 bytes)
+    - Display name (up to 64 bytes)
+    - Strategy URI (off-chain metadata link, up to 200 bytes)
+    - Vault address (defaults to your connected wallet if left blank)
+
+    **Who signs it:** Your wallet — this is the transaction that establishes your ownership of the agent.
+  </Accordion>
+  <Accordion title="record_trade — Record a fill on-chain">
+    `record_trade` writes a trade fill record to the registry. For a fill to count toward your verified total, the indexer must cross-reference it against actual on-chain position state — an agent cannot inflate its count by calling `record_trade` in a loop without placing real orders.
+
+    **When it's called:** After each trade fill executed by the runtime on your agent's behalf.
+
+    **Verification requirement:** The filled size must match the on-chain asset delta within ±2%, the round-trip must be at least 10 seconds, and the trade must be at least $5 USD in size.
+
+    <Warning>
+      Calling `record_trade` without a corresponding on-chain position change does not increment your verified fill count. The indexer independently confirms every fill against settled account state before it counts.
+    </Warning>
+  </Accordion>
+  <Accordion title="delegate_authority — Grant execution rights to the runtime">
+    `delegate_authority` grants the ViperX off-chain runner the right to submit trade transactions and invoke circuit breakers on your agent. It explicitly does not include withdrawal permissions.
+
+    **When it's called:** Once after `register_agent`, when you confirm your agent's delegation during setup.
+
+    **What it grants:** Trade submission and circuit-breaker authority only — scoped to your configured strategy profile.
+
+    **What it never grants:** Withdrawal rights, token transfer approvals, or the ability to move principal.
+  </Accordion>
+  <Accordion title="authority_pause() — Emergency execution halt">
+    `authority_pause()` is an emergency circuit breaker that instantly stops all trade execution for your agent. It is invoked automatically by the runtime when it detects repeated reverts or out-of-profile trade attempts, and it can also be triggered manually from your dashboard.
+
+    **Who can invoke it:** The ViperX monitoring runtime (automatically) or you (manually from the dashboard).
+
+    **Who can unpause it:** Only the vault owner — your wallet. The ViperX team and runtime cannot resume execution on your behalf.
+
+    **What it does not affect:** Your vault balance, withdrawal rights, and the ability to inspect your trade history.
+  </Accordion>
+</AccordionGroup>
+
+## How to Verify Your Agent On-Chain
+
+### Base Sepolia (BaseScan)
+
+<Steps>
+  <Step title="Open the registry contract on BaseScan">
+    Navigate to [sepolia.basescan.org/address/0xA256D01Ca6e89c5B6bDf34F3dd68eBfF47f2C7ee](https://sepolia.basescan.org/address/0xA256D01Ca6e89c5B6bDf34F3dd68eBfF47f2C7ee).
+  </Step>
+  <Step title="Search for your wallet address">
+    Click the **Transactions** tab and filter or search for your wallet address. Your `register_agent` call will appear as an inbound transaction with a matching timestamp.
+  </Step>
+  <Step title="Inspect individual trade records">
+    Each `record_trade` call also appears in the contract's transaction list. Cross-reference the transaction hash with your agent's verified fill count on the leaderboard or agent profile page.
+  </Step>
+</Steps>
+
+### Solana Devnet (Solana Explorer)
+
+<Steps>
+  <Step title="Find your agent's PDA address">
+    Your agent PDA address is shown on your agent profile page. Copy it to your clipboard.
+  </Step>
+  <Step title="Open the PDA on Solana Explorer">
+    Go to [explorer.solana.com](https://explorer.solana.com/?cluster=devnet) (Devnet cluster), paste your PDA address into the search bar, and open the account.
+  </Step>
+  <Step title="Inspect account data and transactions">
+    The account data tab shows your stored agent metadata. The transactions tab lists every `record_trade` and `authority_pause` call associated with your agent.
+  </Step>
+</Steps>
+
+## Indexer and Runtime Status
+
+The ViperX indexer continuously syncs blocks from both networks and cross-references trade fills against settled position state. Current infrastructure status:
+
+<CardGroup cols={3}>
+  <Card title="Base Indexer" icon="cube">
+    **Status:** SYNCED
+
+    **Block Height:** #12,948,123
+
+    Monitoring all registry events and verifying fills on Base Sepolia.
+  </Card>
+  <Card title="Solana Indexer" icon="cube">
+    **Status:** SYNCED
+
+    **Slot Height:** #284,192,41
+
+    Monitoring all Anchor program events and PDA state changes on Solana Devnet.
+  </Card>
+  <Card title="Execution Runtime" icon="bolt">
+    **Status:** ACTIVE
+
+    **Polling Tick Rate:** 15 seconds
+
+    Processing strategy ticks and submitting trade transactions across both networks.
+  </Card>
+</CardGroup>

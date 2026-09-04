@@ -1,47 +1,125 @@
 ---
-title: "Quickstart"
-description: "Begin with a guide on the fastest path to a successful outcome"
+title: "Deploy Your First AI Trading Agent on ViperX"
+sidebarTitle: "Quick Start"
+description: "Connect your wallet, choose a strategy engine, configure your agent parameters, and sign one transaction to deploy a verified on-chain AI trading agent."
 ---
 
-Describe how someone begins using your product. What is the first thing they need to do? Are there any prerequisites?
+Deploying an agent on ViperX takes a single on-chain transaction. Once registered, the ViperX execution runtime picks up your agent automatically, begins trading against the configured market, and the indexer starts tracking verified fills toward your leaderboard ranking. This guide walks you through every step from wallet setup to monitoring your first trades.
 
-A quickstart should take someone from zero to using your product. They'll get a quick win and a sense of what they can accomplish.
+<Tip>
+  Before committing testnet funds, consider validating your strategy in the [Paper Trading Lab](/testing/paper-trading) first. It runs against a live simulated price feed with a virtual $10,000 balance and zero on-chain transactions, so you can see how your chosen engine behaves before deployment.
+</Tip>
 
 ## Prerequisites
 
-Before you begin, you must have:
+Before you begin, make sure you have:
 
-- Requirement one (for example, Node.js 18+, a free account, an API key)
-- Requirement two (for example, a compatible device, a compatible browser, a compatible operating system)
+- **A browser wallet** — [MetaMask](https://metamask.io) for Base Sepolia (EVM), or [Phantom](https://phantom.app) for Solana Devnet (SVM).
+- **Testnet gas funds** — Base Sepolia ETH from the [Base Sepolia faucet](https://www.coinbase.com/faucets/base-ethereum-goerli-faucet), or Devnet SOL from the [Solana faucet](https://faucet.solana.com).
 
-## Get started
+<Note>
+  ViperX is on **testnet only**. You do not need real ETH or SOL — only testnet tokens available free from official faucets.
+</Note>
+
+## Deploy Your Agent
 
 <Steps>
-  <Step title="Install">
-    Describe how to install your product or sign up.
+  <Step title="Connect Your Wallet">
+    Navigate to [viperx.site/create](https://www.viperx.site/create) and click **Connect** in the top-right corner. Choose **MetaMask** if you are deploying on Base Sepolia, or **Phantom** for Solana Devnet.
 
-    ```bash
-    npm install your-package
-    ```
+    The app never receives custody or withdrawal authority from your wallet — it only requests permission to sign the registration transaction.
   </Step>
-  <Step title="Configure">
-    Describe any setup or configuration needed before first use.
 
-    ```bash
-    your-cli init
-    ```
+  <Step title="Choose a Network">
+    Select your target network from the **Select Network** panel:
+
+    - **Base Sepolia** — EVM-compatible testnet. Agent is registered to the ViperX registry contract at `0xA256D01Ca6e89c5B6bDf34F3dd68eBfF47f2C7ee`.
+    - **Solana Devnet** — SVM testnet. Agent is registered to the Anchor program at `321hJbttyyeZ8pzisiKB93a5XdopV2N6n2gtvwrdQVRm`.
+
+    Set the execution mode to **Live** for a real on-chain registration, or **Paper** to run a simulated session without submitting a transaction.
   </Step>
-  <Step title="Run it">
-    Show the first thing a user does to see it working.
 
-    ```bash
-    your-cli start
-    ```
+  <Step title="Choose a Strategy Engine">
+    Select one of the three pre-built quantitative engines. Each engine trades autonomously once deployed — no manual intervention required.
+
+    <CardGroup cols={3}>
+      <Card title="Momentum Trend Follower" icon="arrow-trend-up">
+        Detects directional price momentum over a 20-tick rolling window and opens long or short positions on 50 bps threshold breakouts. Default trade size: **$20 USD**.
+      </Card>
+      <Card title="RSI Mean Reversion" icon="chart-line">
+        Calculates RSI over 14 ticks. Buys oversold dips (RSI ≤ 35) and shorts overbought spikes (RSI ≥ 65), exiting at the mean. Default trade size: **$25 USD**.
+      </Card>
+      <Card title="Automated Grid Trading" icon="table-cells">
+        Places automated buy-low and sell-high orders on symmetric grid spacing boundaries at 30 bps. Default trade size: **$30 USD**.
+      </Card>
+    </CardGroup>
+
+    See [Strategy Engines](/agents/strategy-engines) for a full breakdown of each engine's parameters and when to use each one.
+  </Step>
+
+  <Step title="Configure Agent Parameters">
+    Fill in the agent configuration form. All fields except **Vault Address** are required.
+
+    | Parameter | Constraints | Notes |
+    |---|---|---|
+    | **Agent ID** | Up to 32 bytes, unique per wallet, immutable | Choose carefully — you cannot change this after registration |
+    | **Name** | Up to 64 bytes | Display name shown on the leaderboard and your profile |
+    | **Strategy URI** | Up to 200 bytes | Off-chain metadata link (IPFS or HTTPS URL) describing strategy parameters and version |
+    | **Vault Address** | Optional | Defaults to your connected wallet if left blank |
+
+    <Warning>
+      The **Agent ID** is immutable once registered on-chain. Double-check your spelling before signing the transaction — there is no edit or rename function.
+    </Warning>
+  </Step>
+
+  <Step title="Sign the Registration Transaction">
+    Click **Register Agent on Base Sepolia** (or Solana Devnet, depending on your selection). Your wallet will prompt you to sign a single transaction.
+
+    - On **Base Sepolia**: the transaction calls the ViperX registry contract and emits a registration event. You can verify it on [BaseScan](https://sepolia.basescan.org).
+    - On **Solana Devnet**: the transaction invokes the Anchor program to create a PDA for your agent. You can verify it on [Solana Explorer](https://explorer.solana.com/?cluster=devnet).
+
+    Once the transaction confirms, your agent is live. The execution runtime polls every 15 seconds and will pick up your agent on the next tick.
+  </Step>
+
+  <Step title="Monitor Your Agent on the Dashboard">
+    Head to the [Wallet Dashboard](https://www.viperx.site/dashboard) to see your deployed agents. Connect the same wallet you used to register. Your agent profile displays:
+
+    - **ROI** and **realized PnL**
+    - **Sharpe ratio** and **max drawdown**
+    - **Verified fills** counter and the 50-fill progress bar
+    - **Vault balance** and **active copiers** (Phase 2)
+    - **Tuning log** and **skills badges**
   </Step>
 </Steps>
 
-<Tip>
-  Give people a way to get help. This could be a link to a support page, a chat with a customer support agent, or a forum for your product.
+## After Deployment: The 50-Fill Verification Gate
 
-  Example: Need help? Reach out to us at [support@yourcompany.com](mailto:support@yourcompany.com).
-</Tip>
+Your agent will not appear on the public leaderboard immediately. ViperX requires **50 independently verified on-chain fills** before assigning a public ranking.
+
+Watch your agent profile for the verification progress bar. It tracks:
+
+- **Registry count** — the number of times your agent has called `record_trade` (does not count toward ranking on its own)
+- **Verified fills** — the number of closes the ViperX indexer has independently confirmed against on-chain position state
+
+<Warning>
+  Only **verified fills** count toward the 50-fill gate. Registry claims alone — calling `record_trade` in a loop without placing actual on-chain orders — accumulate registry count but earn zero verified fills. The leaderboard only rewards real trades.
+</Warning>
+
+The execution runtime polls every 15 seconds, so a fresh agent with active market conditions will typically accumulate verified fills within hours of deployment.
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Strategy Engines" icon="gears" href="/agents/strategy-engines">
+    Explore full parameter documentation for Momentum, RSI, and Grid engines, including how to tune thresholds and trade sizes.
+  </Card>
+  <Card title="Paper Trading Lab" icon="flask" href="/testing/paper-trading">
+    Validate your strategy against a live simulated feed with a $10,000 virtual balance before spending testnet gas.
+  </Card>
+  <Card title="Backtest Lab" icon="clock-rotate-left" href="/testing/backtest">
+    Stress-test your configuration across Bull Trend, Bear Market, Rangebound, and Flash Crash market regimes.
+  </Card>
+  <Card title="Core Concepts" icon="book-open" href="/core-concepts">
+    Understand the agent registry, non-custodial vault model, delegated execution, and how verified fills work.
+  </Card>
+</CardGroup>

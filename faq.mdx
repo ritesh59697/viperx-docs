@@ -1,0 +1,167 @@
+---
+title: "Frequently Asked Questions About ViperX"
+sidebarTitle: "FAQ"
+description: "Answers on ViperX custody, leaderboard ranking, anti-gaming rules, agent fail-safes, copy-trading roadmap, Strategy URI, and Skills badge mechanics."
+---
+
+These are the questions that come up most before deploying an agent or allocating capital on ViperX. The answers below cover the security model, how rankings actually work, what prevents manipulation, what happens when things go wrong, and where the protocol is headed. If something isn't covered here, the [protocol documentation](/docs) and [system specs](/specs) go deeper on the technical architecture.
+
+---
+
+## Security
+
+<Accordion title="Do you ever custody my funds?">
+  No. Withdrawal authority never leaves your wallet. The runtime only holds a delegated execution key with strictly bounded permissions: it can submit trade transactions and trigger circuit breakers, nothing else. Even in the event of an infrastructure outage, your principal cannot be moved or drained.
+
+  <Info>
+    The delegation model is enforced at the smart-contract level. The registry contract on Base Sepolia (`0xA256D01Ca6e89c5B6bDf34F3dd68eBfF47f2C7ee`) and the Solana Anchor program (`321hJbttyyeZ8pzisiKB93a5XdopV2N6n2gtvwrdQVRm`) both enforce that withdrawal authority is scoped exclusively to the vault owner's key.
+  </Info>
+
+  **Key guarantees:**
+  - `ZERO WITHDRAWAL RIGHTS` — the runtime key cannot sign withdrawals
+  - `NON-CUSTODIAL VAULT` — your collateral stays in your account or vault at all times
+  - `OWNER REVERSIBLE` — only you can unpause, withdraw, or modify delegation
+</Accordion>
+
+<Accordion title="What happens if an agent malfunctions or loses connection?">
+  If an agent encounters repeated transaction reverts or attempts trades beyond its delegated risk profile, the monitoring runtime invokes `authority_pause()` on-chain, instantly halting all active execution. Only the cryptographic vault owner holds the authority to unpause, tune parameters, or withdraw capital.
+
+  <Warning>
+    Once `authority_pause()` is triggered, no further trades can be submitted until you explicitly unpause from your wallet. This is intentional — a paused agent cannot accumulate losses while you investigate.
+  </Warning>
+
+  **Safety mechanisms:**
+  - `AUTHORITY_PAUSE()` — on-chain halt invoked automatically on repeated reverts
+  - `AUTOMATIC FAIL-SAFE` — triggers on risk-profile violations without manual intervention
+  - `VAULT OWNER OVERRIDE` — only your wallet key can resume execution
+</Accordion>
+
+---
+
+## Ranking
+
+<Accordion title="How is the leaderboard ranked?">
+  Rankings are governed by risk-adjusted return (a Sharpe-like metric with maximum drawdown penalties), not raw vanity PnL. Performance calculations are indexed directly from verified on-chain settled fills and vault balances, ensuring high-leverage gambles cannot game the top spots.
+
+  A lucky high-leverage trade might produce a large nominal return, but the drawdown penalty and volatility adjustment will suppress its Sharpe score relative to an agent with consistent, disciplined risk management.
+
+  **Ranking properties:**
+  - `SHARPE-WEIGHTED` — volatility-adjusted return, not absolute PnL
+  - `DRAWDOWN PENALTY` — maximum drawdown is factored into the score
+  - `ON-CHAIN INDEXED` — all inputs are sourced from verified on-chain state, never self-reported
+</Accordion>
+
+<Accordion title="What stops wash trading and sybil attacks?">
+  A multi-stage cryptographic verification gate prevents artificial volume from reaching the leaderboard. An agent must accumulate a minimum of 50 confirmed trades validated against on-chain position state before receiving any public ranking. Beyond the fill threshold, three automated heuristics run against every close:
+
+  | Heuristic | Rule | Effect |
+  |---|---|---|
+  | Position Delta Match | Trade size must match on-chain asset delta within ±2% | Rejects inflated size claims |
+  | Minimum Round-Trip | Open-to-close must be at least 10 seconds | Flags wash-trade loops |
+  | Minimum Trade Size | Every fill must be at least $5 USD | Blocks micro-transaction inflation |
+
+  Self-reported PnL is also compared against settled on-chain PnL at each block. Any divergence disqualifies the affected fills.
+
+  **Anti-gaming properties:**
+  - `50-FILL VERIFICATION GATE` — no rank assigned until 50 independently confirmed trades
+  - `$5 MIN ORDER` — micro-transactions cannot inflate the fill counter
+  - `SETTLED PNL PARITY` — self-reported vs. on-chain PnL must match
+</Accordion>
+
+---
+
+## Features
+
+<Accordion title="What is a Strategy URI?">
+  A Strategy URI is an off-chain metadata pointer — an IPFS CID or a URL — that describes your agent's strategy configuration, parameter set, and version. The execution runtime fetches it at startup to configure the trading engine with your chosen parameters (tick windows, thresholds, trade sizes, and so on).
+
+  <Tip>
+    Keep your Strategy URI pointing to stable, versioned metadata. If the URI becomes unreachable, the runtime cannot load your configuration and the agent will not trade.
+  </Tip>
+
+  **Technical constraints:**
+  - Maximum 200 bytes
+  - Stored immutably in the registry at agent registration time
+  - Can reference IPFS (`ipfs://`) or any reachable HTTPS URL
+  - Fetched by the execution runtime on every cold start
+</Accordion>
+
+<Accordion title="What are agent Skills badges?">
+  Skills badges are on-profile achievement markers that unlock automatically when an agent hits specific performance milestones. They give anyone inspecting your agent's profile an at-a-glance signal of what the strategy has demonstrably achieved.
+
+  <CardGroup cols={3}>
+    <Card title="Proven Track Record" icon="medal">
+      Unlocked when your agent accumulates **50 or more** independently verified on-chain fills. This is also the threshold required to appear on the public leaderboard.
+    </Card>
+    <Card title="Disciplined" icon="chart-line">
+      Unlocked when your agent maintains a **Sharpe ratio above 1.0** across a minimum of **20 verified trades**. Signals consistent risk-adjusted performance.
+    </Card>
+    <Card title="Risk-Aware" icon="shield-check">
+      Unlocked when your agent keeps **maximum drawdown below 10%** across a minimum of **20 verified trades**. Signals disciplined downside management.
+    </Card>
+  </CardGroup>
+
+  Badges appear on the public agent profile alongside ROI, Sharpe, max drawdown, realized PnL, verified fill count, vault balance, and the full tuning log.
+</Accordion>
+
+<Accordion title="What is the Paper Trading Lab?">
+  The Paper Trading Lab lets you run any of the three strategy engines against a live simulated price feed with a virtual **$10,000** starting balance. No wallet required, no on-chain transactions, no real capital at risk.
+
+  Use it to validate your parameter choices before committing to a Devnet deployment. The Paper Trading Lab supports all three strategy engines:
+
+  - **Momentum Trend Follower** — directional breakout on rolling price momentum
+  - **RSI Mean Reversion** — buy oversold dips, short overbought spikes
+  - **Automated Grid Trading** — symmetric buy-low/sell-high grid around baseline price
+
+  <Tip>
+    The recommended journey is **Paper → Devnet → Mainnet**. Tune parameters in the Paper Trading Lab, validate on Solana Devnet with real (but free) on-chain fills, then graduate to mainnet once you have a verified track record.
+  </Tip>
+</Accordion>
+
+<Accordion title="What market regimes does the Backtest Lab simulate?">
+  The Backtest Lab lets you stress-test your strategy configuration against four distinct synthetic market conditions before touching live capital:
+
+  | Regime | Description |
+  |---|---|
+  | **Bull Trend** | Upward-drifting market with standard crypto volatility |
+  | **Bear Market** | Declining market with elevated volatility and sharp panic moves |
+  | **Rangebound** | Oscillating price action within support and resistance boundaries |
+  | **Flash Crash & Recovery** | Stable period followed by a sudden 30% dump and V-shaped recovery |
+
+  After running a backtest, you can carry the best-performing parameter configuration directly into the Agent Deployment page with a single click.
+</Accordion>
+
+---
+
+## Roadmap
+
+<Accordion title="Is ViperX live on mainnet?">
+  Not yet. ViperX is live on **Base Sepolia testnet** and **Solana Devnet** for live agent verification, tournament dry-runs, and execution latency benchmarking while security audits and liquidity integrations are being finalized before mainnet launch.
+
+  All activity you see on the leaderboard today — verified fills, Sharpe rankings, agent profiles — is real on-chain activity on test networks. The verification mechanics, anti-gaming heuristics, and ranking algorithm are production-grade; only the network is testnet.
+
+  **Current network status:**
+  - `BASE SEPOLIA ACTIVE` — registry at `0xA256D01Ca6e89c5B6bDf34F3dd68eBfF47f2C7ee`
+  - `SOLANA DEVNET` — Anchor program at `321hJbttyyeZ8pzisiKB93a5XdopV2N6n2gtvwrdQVRm`
+  - `PRE-MAINNET AUDITS` — security audits and liquidity integrations in progress
+</Accordion>
+
+<Accordion title="Can I copy-trade or delegate capital to top-ranked agents?">
+  Social copy-trading and vault delegation are launching in **Phase 2**. Investors will be able to allocate USDC into smart vaults that mirror verified agent strategies with automated on-chain fee splits and verifiable historical alpha.
+
+  Phase 2 specifically delivers:
+  - **User vault delegation** — allocate capital to a chosen agent's strategy
+  - **Automated mirror subscriptions** — your vault mirrors fills in real time
+  - **Performance fee splits** — set at subscription time, enforced by smart contract
+  - **Strategy NFT metadata** — verified track records bound to transferable tokens
+  - **Copy-trading marketplace** — browse and subscribe to verified vaults
+
+  <Info>
+    Check the [Roadmap](/roadmap) page for the full Phase 2 and Phase 3 feature breakdown and current development status.
+  </Info>
+
+  **Phase 2 properties:**
+  - `PHASE 2 ROADMAP` — currently in active development
+  - `SMART VAULT DELEGATION` — capital allocation with on-chain withdrawal rights
+  - `PROVABLE TRACK RECORD` — only agents with verified fills are eligible for copy-trading
+</Accordion>

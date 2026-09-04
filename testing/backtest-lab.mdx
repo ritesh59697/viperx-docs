@@ -1,0 +1,109 @@
+---
+title: "Validate Bot Configurations in the Backtesting Lab"
+sidebarTitle: "Backtest Lab"
+description: "Stress-test your strategy against Bull Trend, Bear Market, Rangebound, and Flash Crash regimes to find the configuration that holds up before going live."
+---
+
+The Backtesting Lab lets you run your trading bot configuration against synthetic historical price scenarios before you deploy a single real token. Unlike the Paper Trading Lab's live-feed simulation, the Backtest Lab replays your chosen strategy across four distinct market regimes — each designed to surface a different kind of performance failure. Use it to stress-test parameter sensitivity, compare strategies head-to-head across conditions, and identify the configuration that holds up across the full market cycle before you go live.
+
+## How to Run a Backtest
+
+<Steps>
+  <Step title="Select a Strategy">
+    Choose which strategy engine you want to test from the **Strategy** selector:
+
+    - **Momentum** — opens positions on directional price breakouts over a rolling lookback window.
+    - **Grid** — places buy-low / sell-high orders across a symmetric grid around the market price.
+    - **RSI Reversion** — enters long on oversold RSI readings and short on overbought readings, exiting at the mean.
+  </Step>
+
+  <Step title="Select a Target Market">
+    Pick the market the backtest will simulate fills against:
+
+    | Market | Asset |
+    |--------|-------|
+    | **SOL-PERP** | Solana perpetual futures |
+    | **BTC-PERP** | Bitcoin perpetual futures |
+    | **ETH-PERP** | Ethereum perpetual futures |
+
+    Choosing different markets lets you test whether a strategy is robust across asset classes or tuned to a single instrument's volatility profile.
+  </Step>
+
+  <Step title="Set Starting Cash">
+    Enter the **Starting Cash** amount that the simulation will use as the initial portfolio balance. Set this to match the vault size you intend to deploy with on Devnet so the output metrics are directly comparable.
+  </Step>
+
+  <Step title="Set Trade Size (USD)">
+    Enter the notional **Trade Size** in USD for each simulated order. This should reflect the position size you plan to use in production. Oversizing relative to starting cash tests margin stress; undersizing reveals fee drag.
+  </Step>
+
+  <Step title="Adjust Strategy Parameters">
+    Fine-tune the two core strategy parameters before running:
+
+    <CardGroup cols={2}>
+      <Card title="Trend Threshold" icon="sliders">
+        The minimum price movement (in basis points) that triggers a Momentum entry or sets a Grid boundary. Default: **50 bps**. Lower values increase trade frequency; higher values reduce noise-driven entries.
+      </Card>
+      <Card title="Lookback Window" icon="clock-rotate-left">
+        The number of ticks used to calculate momentum or RSI signals. Default: **20 ticks**. A shorter window reacts faster but amplifies false signals; a longer window smooths signals but delays entries.
+      </Card>
+    </CardGroup>
+  </Step>
+
+  <Step title="Choose a Market Regime">
+    Select the synthetic price scenario the backtest will run against. See [Market Regimes](#market-regimes) below for a full description of each option.
+  </Step>
+
+  <Step title="Click Run Backtest">
+    Click **Run Backtest** to start the simulation. The engine replays your strategy's signal logic tick-by-tick against the selected regime's synthetic price series and returns a full performance summary — including total return, trade count, win rate, and drawdown — once the run completes.
+  </Step>
+</Steps>
+
+## Market Regimes
+
+Each regime is a synthetic price scenario engineered to expose a specific category of strategy weakness. Run all four before committing to a parameter set.
+
+<CardGroup cols={2}>
+  <Card title="🐂 Bull Trend (Upward Drift)" icon="arrow-trend-up">
+    Simulates an upward trending market with standard crypto volatility. Momentum strategies typically excel here; mean-reversion and grid strategies may underperform as price drifts steadily beyond grid boundaries.
+  </Card>
+  <Card title="🐻 Bear Market (Downward Panic)" icon="arrow-trend-down">
+    Simulates a declining market with higher volatility and sharp panic sell-offs. Tests how well your strategy manages drawdown and whether it exits losing long positions before they compound.
+  </Card>
+  <Card title="↔️ Rangebound (Choppy Consolidation)" icon="arrows-left-right">
+    Simulates oscillating price action within support and resistance boundaries. Grid and RSI Reversion strategies tend to thrive here; Momentum strategies may generate frequent false breakout signals and accumulate losses.
+  </Card>
+  <Card title="⚡ Flash Crash & Recovery" icon="bolt">
+    Simulates a stable period followed by a sudden 30% price dump, then a V-shaped recovery. Exposes stop-loss and re-entry logic under extreme conditions — critical for any strategy carrying open positions through high-impact events.
+  </Card>
+</CardGroup>
+
+<Tip>
+  Test your configuration against **all four regimes** before committing to a strategy for live deployment. A configuration that looks profitable in a Bull Trend regime may catastrophically underperform in a Bear Market or Flash Crash. The most resilient configurations show positive or mildly negative returns across all four, rather than exceptional results in one regime and ruin in another.
+</Tip>
+
+## Carrying Results into Deployment
+
+After a backtest run completes, you can carry the best-performing configuration directly to the Agent Deployment page — no manual re-entry of parameters required.
+
+<Steps>
+  <Step title="Identify your best run">
+    Compare results across regimes. Look for configurations with the best combination of total return, low max drawdown, and consistent win rate.
+  </Step>
+  <Step title="Click 'Deploy with This Configuration'">
+    On the backtest results panel, click the one-click **Deploy with This Configuration** button. ViperX pre-fills the [Agent Deployment](/agents/deploy) form with your exact strategy engine, trade size, and parameter values.
+  </Step>
+  <Step title="Review and register">
+    On the Deployment page, confirm the pre-filled values, connect your wallet, and sign the registration transaction to go live on Devnet.
+  </Step>
+</Steps>
+
+## Limitations to Keep in Mind
+
+<Warning>
+  Backtest Lab results are based on **synthetic, algorithmically generated price data** — not real historical market data. Treat backtest output as a parameter sensitivity guide, not a performance guarantee.
+
+  - **Synthetic regimes** do not capture real order book microstructure, liquidity gaps, or actual historical events.
+  - **Live DEX conditions** introduce slippage, partial fills, and gas costs that synthetic simulations cannot model precisely.
+  - **Past (even synthetic) performance** is not indicative of future live results — validate further with the [Paper Trading Lab](/testing/paper-trading) and Devnet fills before risking real capital.
+</Warning>

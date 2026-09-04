@@ -1,0 +1,102 @@
+---
+title: "Non-Custodial Vault: How ViperX Protects Your Funds"
+sidebarTitle: "Non-Custodial Model"
+description: "Learn how ViperX delegates only trade execution to the runtime — withdrawal rights stay in your wallet at all times, with no exceptions."
+---
+
+ViperX is built on a strict non-custodial security model: you deploy autonomous trading agents without ever surrendering control of your capital. The ViperX runtime receives a narrow, bounded delegation to submit trade transactions and trigger safety halts — nothing more. Your withdrawal rights remain cryptographically locked to your wallet from registration through every live trade.
+
+<Note>
+  **Core guarantee:** Withdrawal authority never leaves your wallet. The ViperX runtime holds zero withdrawal permissions and cannot move, drain, or reallocate your principal under any circumstances — including infrastructure outages.
+</Note>
+
+## What the Runtime Can and Cannot Do
+
+When you delegate authority to the ViperX execution runtime, you grant a strictly scoped permission set. The delegation transaction encodes exactly which actions the runtime is authorised to take on-chain.
+
+<CardGroup cols={2}>
+  <Card title="What the Runtime CAN Do" icon="circle-check">
+    - Submit trade transactions on your behalf via decentralised exchanges
+    - Invoke `authority_pause()` to halt execution if the agent behaves unexpectedly
+    - Trigger circuit breakers when repeated transaction reverts are detected
+    - Record verified trade fills on-chain against your agent's registry entry
+  </Card>
+  <Card title="What the Runtime CANNOT Do" icon="circle-xmark">
+    - Withdraw funds from your vault or wallet
+    - Move or reallocate your principal balance
+    - Drain collateral during an outage or downtime
+    - Unpause a halted agent (only you can do this)
+  </Card>
+</CardGroup>
+
+## How Delegation Works
+
+Delegating authority to the runtime is a single on-chain transaction that you sign from your wallet. It grants the ViperX off-chain runner the right to execute trades and manage circuit breakers within the bounds of your configured strategy profile — but it explicitly excludes withdrawal permissions.
+
+<Steps>
+  <Step title="Register your agent">
+    Sign a registration transaction that writes your agent identity, strategy metadata URI, and vault address to the on-chain registry. This establishes your agent's immutable on-chain record.
+  </Step>
+  <Step title="Sign the delegation transaction">
+    Sign a second transaction that calls `delegate_authority`, granting the ViperX runner execution rights scoped strictly to trade submission and circuit breaker management.
+  </Step>
+  <Step title="Runtime operates within bounds">
+    The runner polls every 15 seconds and executes trades within the parameters of your strategy config. It cannot exceed your delegated risk profile or access withdrawal functions.
+  </Step>
+  <Step title="Retain full override authority">
+    At any time, you can unpause a halted agent, adjust parameters, or withdraw capital directly from your vault — no ViperX approval required.
+  </Step>
+</Steps>
+
+## Circuit Breaker: `authority_pause()`
+
+If your agent encounters repeated transaction reverts or attempts to execute trades that fall outside its delegated risk profile, the monitoring runtime automatically invokes `authority_pause()` on-chain. This instantly halts all active execution for that agent.
+
+<Warning>
+  Only the cryptographic vault owner — your wallet — can unpause a halted agent. The ViperX team and runtime have no ability to resume execution on your behalf.
+</Warning>
+
+`authority_pause()` is triggered automatically in the following situations:
+
+- The agent records consecutive transaction reverts above a threshold
+- A proposed trade exceeds the size or leverage bounds defined in the delegated risk profile
+- The indexer detects a divergence between self-reported and settled on-chain PnL
+
+After the circuit breaker fires, your funds remain fully accessible. You can withdraw capital, inspect the tuning log, adjust strategy parameters, and re-authorise execution whenever you choose.
+
+## What Happens During an Outage
+
+If ViperX infrastructure goes offline — for any reason — your principal is safe. Because the runtime holds no withdrawal authority, it cannot move funds even if it loses connectivity, crashes, or is compromised.
+
+<Info>
+  During an outage, trade execution pauses. Your vault balance and collateral remain exactly where they were when the runtime last connected. No automated settlement, liquidation, or reallocation can occur through the ViperX runtime.
+</Info>
+
+## Owner Override: You Are Always in Control
+
+As the vault owner, you retain unconditional authority over your capital at all times. No ViperX system state — active trades, a paused circuit breaker, or network downtime — can prevent you from exercising the following actions directly on-chain:
+
+- **Unpause** a halted agent and restore execution
+- **Tune parameters** such as trade size, risk bounds, and strategy thresholds
+- **Withdraw capital** from your vault at any time without ViperX intermediation
+
+<Tip>
+  If you want to stop your agent permanently, simply withdraw your capital from the vault. Without a funded balance, the runtime has nothing to trade with and will idle silently.
+</Tip>
+
+## Frequently Asked Questions
+
+<AccordionGroup>
+  <Accordion title="Do you ever custody my funds?">
+    No. Withdrawal authority never leaves your wallet. The runtime only holds a delegated execution key with strictly bounded permissions: it can submit trade transactions and trigger circuit breakers, nothing else. Even in the event of an infrastructure outage, your principal cannot be moved or drained.
+  </Accordion>
+  <Accordion title="What if an agent malfunctions or loses connection?">
+    If an agent encounters repeated transaction reverts or attempts trades beyond its delegated risk profile, the monitoring runtime invokes `authority_pause()` on-chain, instantly halting all active execution. Only the cryptographic vault owner holds the authority to unpause, tune parameters, or withdraw capital.
+  </Accordion>
+  <Accordion title="What does the delegation transaction actually grant?">
+    The `delegate_authority` transaction grants the ViperX runner the right to call trade-submission and circuit-breaker functions on your agent's behalf. It does not grant access to withdrawal functions, does not transfer token approvals, and cannot be extended by the runtime unilaterally. You can revoke delegation at any time by signing a new transaction from your wallet.
+  </Accordion>
+  <Accordion title="Can ViperX prevent me from withdrawing my funds?">
+    No. Withdrawal functions are controlled exclusively by your wallet's private key. ViperX contracts have no admin key, pause mechanism, or upgrade proxy that could block a withdrawal initiated by the vault owner.
+  </Accordion>
+</AccordionGroup>

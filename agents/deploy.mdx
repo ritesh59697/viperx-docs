@@ -1,0 +1,140 @@
+---
+title: "Register and Deploy a Trading Agent on ViperX"
+sidebarTitle: "Deploy an Agent"
+description: "Register a trading agent on Base Sepolia or Solana Devnet in one transaction. The runtime picks it up and starts placing verified on-chain trades."
+---
+
+Deploying a trading agent on ViperX means writing your agent's identity, strategy, and vault address to an on-chain registry in one transaction — nothing is custodied by the app, and your withdrawal rights never leave your wallet. Once registered, the execution runtime automatically picks up your agent and begins polling markets every 15 seconds to execute trades through decentralized exchanges.
+
+## Choose a Network
+
+ViperX currently runs on two testnets. Pick the one that matches your wallet and tooling:
+
+<CardGroup cols={2}>
+  <Card title="Base Sepolia" icon="ethereum">
+    EVM-compatible network. Connect any Base Sepolia wallet (e.g. MetaMask). Agent identity is stored in the ViperX EVM registry contract. Trades are verifiable on BaseScan.
+  </Card>
+  <Card title="Solana Devnet" icon="circle">
+    SVM-compatible network. Connect a Solana wallet (e.g. Phantom). Agent identity is stored as a PDA via the ViperX Anchor program. Trades are verifiable on Solana Explorer.
+  </Card>
+</CardGroup>
+
+<Note>
+  Neither network holds mainnet funds. Base Sepolia and Solana Devnet are live test environments used for verified agent execution, leaderboard dry-runs, and latency benchmarking ahead of mainnet launch.
+</Note>
+
+## Choose an Execution Mode
+
+Before connecting your wallet, decide whether you want your agent to trade on-chain or run in simulation:
+
+| Mode | Trades on-chain? | Leaderboard eligible? | Best for |
+|------|------------------|-----------------------|----------|
+| **Live** | Yes — every fill recorded on-chain | Yes, after 50 verified fills | Real agent deployment |
+| **Paper** | No — virtual $10,000 balance | No | Strategy validation before committing |
+
+<Tip>
+  Run the [Paper Trading Lab](/testing/paper-trading) first to validate your strategy parameters, then deploy live with confidence.
+</Tip>
+
+## Deploy Your Agent
+
+<Steps>
+  <Step title="Select a Network and Execution Mode">
+    Navigate to [viperx.site/create](https://www.viperx.site/create). Choose **Base Sepolia** or **Solana Devnet** from the network selector, then set execution mode to **Live** for on-chain registration or **Paper** for simulation.
+
+    Connect your wallet using the **Connect** button. For Base Sepolia, use a Web3 EVM wallet such as MetaMask. For Solana Devnet, use a Solana wallet such as Phantom. Your connected address becomes the default vault owner.
+  </Step>
+
+  <Step title="Select a Strategy Engine">
+    Choose one of the three built-in quantitative engines:
+
+    - **Momentum Trend Follower** — opens long/short positions on directional breakouts over a 20-tick rolling window
+    - **RSI Mean Reversion** — buys oversold dips (RSI ≤ 35) and shorts overbought spikes (RSI ≥ 65)
+    - **Automated Grid Trading** — places symmetric buy-low/sell-high orders at 0.30% grid spacing intervals
+
+    See the [Strategy Engines](/agents/strategy-engines) reference for full parameter details and market-fit guidance.
+  </Step>
+
+  <Step title="Configure Agent Parameters">
+    Fill in the registration fields:
+
+    - **Agent ID** — a unique identifier for your wallet, immutable after registration, up to 32 bytes
+    - **Name** — a human-readable display name, up to 64 bytes (shown on the leaderboard and your profile)
+    - **Strategy URI** — an optional link to off-chain strategy metadata (e.g. an IPFS JSON file), up to 200 bytes
+    - **Vault Address** — the address that holds collateral and retains withdrawal rights; defaults to your connected wallet if left blank
+
+    <Note>
+      Nothing is custodied by this app. The ViperX execution runtime only receives a narrowly scoped delegation to open and close trading positions — withdrawal authority stays with your vault address at all times.
+    </Note>
+  </Step>
+
+  <Step title="Sign the Registration Transaction">
+    Click **Register Agent**. Your wallet prompts you to sign a single transaction that writes your agent's identity to the registry contract. Confirm the transaction in your wallet.
+
+    - On **Base Sepolia**, the transaction is submitted to the ViperX Agent Registry contract at `0xA256D01Ca6e89c5B6bDf34F3dd68eBfF47f2C7ee`.
+    - On **Solana Devnet**, the transaction creates a Program Derived Address (PDA) via the ViperX Anchor program at `321hJbttyyeZ8pzisiKB93a5XdopV2N6n2gtvwrdQVRm`.
+
+    Once confirmed, your agent is live on-chain and immediately visible in the registry.
+  </Step>
+</Steps>
+
+## What Happens After Registration
+
+After your transaction confirms, the ViperX execution runtime picks up your agent automatically:
+
+1. **Polling begins** — the runtime fetches your strategy configuration from the registry (and your Strategy URI if provided) every **15 seconds**.
+2. **Trades execute** — based on your strategy engine's signals, the runtime submits buy and sell orders through decentralized exchanges on your chosen network.
+3. **Fills are recorded** — each completed trade is written on-chain with a transaction signature, creating an immutable execution record.
+4. **Indexer verification** — the ViperX indexer cross-references each fill against actual on-chain position state. Fills that pass anti-gaming heuristics increment your verified fill count.
+5. **Leaderboard eligibility** — once you accumulate **50 independently verified fills**, your agent becomes eligible for leaderboard ranking by Sharpe-like ratio.
+
+<Info>
+  The leaderboard ranks by volatility-adjusted Sharpe ratio, not raw PnL. A high-leverage lucky trade cannot outrank consistent risk-managed returns. See [How the Leaderboard Works](/leaderboard) for the full ranking methodology.
+</Info>
+
+## Verify Your Registration On-Chain
+
+After deployment, confirm your agent's registry entry using the block explorer for your network:
+
+<Tabs>
+  <Tab title="Base Sepolia">
+    1. Copy the registry contract address: `0xA256D01Ca6e89c5B6bDf34F3dd68eBfF47f2C7ee`
+    2. Open [BaseScan Sepolia](https://sepolia.basescan.org) and paste the address into the search bar.
+    3. Go to the **Contract** tab, then select **Read Contract**.
+    4. Call `getAgent` with your wallet address to read your agent's on-chain record — name, strategy URI, vault address, and trade counter will all be visible.
+    5. Alternatively, search directly for your wallet address and inspect the **Internal Txns** tab to see the registration transaction.
+
+    ```text
+    Registry Contract (Base Sepolia)
+    0xA256D01Ca6e89c5B6bDf34F3dd68eBfF47f2C7ee
+    ```
+  </Tab>
+  <Tab title="Solana Devnet">
+    1. Copy the Anchor program address: `321hJbttyyeZ8pzisiKB93a5XdopV2N6n2gtvwrdQVRm`
+    2. Open [Solana Explorer](https://explorer.solana.com/?cluster=devnet) (make sure **Devnet** is selected in the cluster dropdown).
+    3. Paste the program address to see all accounts and recent transactions associated with the registry.
+    4. Find your agent's PDA by searching for your wallet address and filtering by program interactions. Your agent account stores the Agent ID, name, strategy URI, vault address, and trade counter.
+
+    ```text
+    Registry Anchor Program (Solana Devnet)
+    321hJbttyyeZ8pzisiKB93a5XdopV2N6n2gtvwrdQVRm
+    ```
+  </Tab>
+</Tabs>
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Strategy Engines" icon="sliders" href="/agents/strategy-engines">
+    Explore the full parameter reference for Momentum, RSI, and Grid strategies.
+  </Card>
+  <Card title="Parameters Reference" icon="list" href="/agents/parameters">
+    Review every registration and configuration field in detail.
+  </Card>
+  <Card title="Backtest Lab" icon="flask" href="/testing/backtest-lab">
+    Simulate your strategy across Bull, Bear, Rangebound, and Flash Crash regimes before going live.
+  </Card>
+  <Card title="Wallet Dashboard" icon="gauge" href="/agents/dashboard">
+    Monitor your agent's performance, tune parameters, and track verified fills.
+  </Card>
+</CardGroup>
