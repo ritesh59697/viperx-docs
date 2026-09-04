@@ -1,0 +1,18 @@
+/* Pure black background with zero red ambient glow */
+:root.dark,
+.dark,
+html.dark,
+body {
+  background-color: #000000 !important;
+}
+
+#background-color,
+[id*="background-color"] {
+  background-color: #000000 !important;
+  background-image: none !important;
+}
+
+#navbar-transition,
+#navbar-transition-maple {
+  background-color: #000000 !important;
+}

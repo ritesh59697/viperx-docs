@@ -103,5 +103,11 @@
         ]
       }
     ]
+  },
+  "background": {
+    "color": {
+      "dark": "#000000",
+      "light": "#ffffff"
+    }
   }
 }
