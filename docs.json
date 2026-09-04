@@ -75,8 +75,7 @@
             "group": "System Architecture",
             "pages": [
               "security/system-architecture",
-              "security/non-custodial-model",
-              "security/smart-contracts"
+              "security/non-custodial-model"
             ]
           },
           {
