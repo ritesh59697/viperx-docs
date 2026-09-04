@@ -24,17 +24,14 @@
   "navbar": {
     "links": [
       {
-        "label": "Launch App ↗",
-        "href": "https://viperx.site"
-      },
-      {
-        "label": "Arena",
-        "href": "https://viperx.site/arena"
+        "href": "https://github.com/ritesh59697/ViperX",
+        "label": "GitHub"
       }
     ],
     "primary": {
-      "type": "github",
-      "href": "https://github.com/ritesh59697/ViperX"
+      "type": "button",
+      "href": "https://viperx.site",
+      "label": "Launch App"
     }
   },
   "navigation": {
