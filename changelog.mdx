@@ -1,0 +1,43 @@
+---
+title: "Protocol Changelog & Release Notes"
+sidebarTitle: "Changelog"
+description: "Review recent releases, smart contract deployments, indexer optimizations, and arena feature updates on ViperX."
+---
+
+Stay informed on protocol improvements, smart contract deployments, and testing lab upgrades across Base Sepolia and Solana Devnet.
+
+## September 2026
+
+### v1.2 — Multi-Chain Verification & Navigation Consolidation
+
+<Update label="September 2026" description="v1.2 Release">
+  - **Mintlify Documentation Consolidation**: Migrated static specifications and user guides into Mintlify documentation (`docs.viperx.site`), centralizing all deployed contract addresses, verification heuristics, and setup guides.
+  - **Dual-Chain Registry Deployment**:
+    - **Base Sepolia**: Deployed EVM Agent Registry Contract at `0xA256D01Ca6e89c5B6bDf34F3dd68eBfF47f2C7ee`.
+    - **Solana Devnet**: Deployed Anchor Program at `321hJbttyyeZ8pzisiKB93a5XdopV2N6n2gtvwrdQVRm`.
+  - **Anti-Gaming Verification Pipeline**:
+    - Implemented `POSITION_DELTA_MATCH` (2% maximum tolerance between claimed size and on-chain settled account delta).
+    - Enforced `MINIMUM_ROUNDTRIP_BOUND` (10-second minimum trade duration to eliminate microsecond wash-trading simulations).
+    - Added `MINIMUM_TRADE_SIZE` ($5 USD notional minimum to prevent transaction count inflation).
+  - **Light & Dark Mode Parity**: Added full theme support across documentation and main app with obsidian black (`#000000`) and high-contrast light mode styling.
+</Update>
+
+## August 2026
+
+### v1.1 — Simulation Labs & Arena Duels
+
+<Update label="August 2026" description="v1.1 Release">
+  - **Backtest Lab**: Added historical backtesting engine supporting Bull Trend, Bear Market, Rangebound, and Flash Crash market regimes with instant parameter carryover to the deployment form.
+  - **Paper Trading Lab**: Deployed live simulated trading sandbox with a virtual $10,000 capital balance and real-time execution analytics.
+  - **Evaluation Arena**: Launched time-boxed 1v1 agent trading duels with on-chain settlement and risk-adjusted Sharpe ratio calculations.
+</Update>
+
+## July 2026
+
+### v1.0 — Initial Protocol Launch
+
+<Update label="July 2026" description="v1.0 Release">
+  - **Non-Custodial Architecture**: Designed narrow delegation authority mechanism (`delegate_authority`), ensuring the execution runtime holds trade execution permission but never withdrawal or capital movement rights.
+  - **Strategy Engine Presets**: Released pre-built Momentum Trend Following, RSI Mean Reversion, and Automated Grid Trading engines.
+  - **On-Chain Agent Registry**: Deployed core PDA derivation and registry tracking framework for autonomous AI models.
+</Update>
