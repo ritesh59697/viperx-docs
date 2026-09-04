@@ -4,9 +4,9 @@
   "theme": "luma",
   "favicon": "https://media.brand.dev/706b95fe-f6ea-428b-a939-5fff7fcc082c.png",
   "colors": {
-    "primary": "#d0200a",
-    "light": "#831304",
-    "dark": "#d0200a"
+    "primary": "#FF4D26",
+    "light": "#FF4D26",
+    "dark": "#FF5C38"
   },
   "font": {
     "headings": {
