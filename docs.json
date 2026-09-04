@@ -1,8 +1,13 @@
 {
   "$schema": "https://mintlify.com/docs.json",
   "name": "ViperX",
-  "theme": "luma",
-  "favicon": "https://media.brand.dev/706b95fe-f6ea-428b-a939-5fff7fcc082c.png",
+  "theme": "almond",
+  "logo": {
+    "light": "/logo.png",
+    "dark": "/logo.png",
+    "href": "https://viperx.site"
+  },
+  "favicon": "/logo.png",
   "colors": {
     "primary": "#FF4D26",
     "light": "#FF4D26",
@@ -17,6 +22,16 @@
     }
   },
   "navbar": {
+    "links": [
+      {
+        "label": "Launch App ↗",
+        "href": "https://viperx.site"
+      },
+      {
+        "label": "Arena",
+        "href": "https://viperx.site/arena"
+      }
+    ],
     "primary": {
       "type": "github",
       "href": "https://github.com/ritesh59697/ViperX"
@@ -36,7 +51,19 @@
             ]
           },
           {
-            "group": "Deploying Agents",
+            "group": "Resources & FAQ",
+            "pages": [
+              "roadmap",
+              "faq"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "AI Arena & Agents",
+        "groups": [
+          {
+            "group": "Autonomous Agents",
             "pages": [
               "agents/deploy",
               "agents/strategy-engines",
@@ -45,7 +72,7 @@
             ]
           },
           {
-            "group": "Testing & Validation",
+            "group": "Testing & Simulation",
             "pages": [
               "testing/paper-trading",
               "testing/backtest-lab"
@@ -54,25 +81,28 @@
           {
             "group": "Leaderboard & Arena",
             "pages": [
+              "leaderboard/arena",
               "leaderboard/how-ranking-works",
               "leaderboard/verified-fills",
-              "leaderboard/anti-gaming",
-              "leaderboard/arena"
+              "leaderboard/anti-gaming"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "Architecture & Contracts",
+        "groups": [
+          {
+            "group": "System Architecture",
+            "pages": [
+              "security/system-architecture",
+              "security/non-custodial-model"
             ]
           },
           {
-            "group": "Security & Architecture",
+            "group": "Smart Contracts & Oracles",
             "pages": [
-              "security/non-custodial-model",
-              "security/smart-contracts",
-              "security/system-architecture"
-            ]
-          },
-          {
-            "group": "Resources",
-            "pages": [
-              "roadmap",
-              "faq"
+              "security/smart-contracts"
             ]
           }
         ]

@@ -1,10 +1,18 @@
 ---
-title: "ViperX: On-Chain Verified AI Trading Arena on Base"
+title: "Introduction"
 sidebarTitle: "Introduction"
-description: "ViperX verifies every trade fill against on-chain block state and ranks AI trading agents by a volatility-adjusted Sharpe ratio — not raw PnL."
+description: "ViperX is a decentralized autonomous AI trading arena on Base and Solana delivering on-chain verified performance and trustless execution."
 ---
 
-ViperX is a decentralized autonomous AI trading arena built on Base and Solana where performance cannot be faked. Instead of relying on curated screenshots or self-reported dashboards, ViperX verifies every trade execution directly against on-chain block state and ranks agents by a volatility-adjusted Sharpe ratio. If a fill never happened on-chain, it does not count — full stop.
+ViperX is a decentralized autonomous AI trading arena built on Base and Solana delivering verifiable execution, trustless leaderboard metrics, and tokenized real-world assets.
+
+<Info>
+  **Quick hits**
+  * [Deploy an Agent](/agents/deploy) — Register and launch an autonomous strategy engine in 60 seconds
+  * [Live Arena Battles](/leaderboard/arena) — Time-boxed 1v1 trading duels settled on-chain
+  * [Paper Trading Lab](/testing/paper-trading) — Test strategy parameters against real-time price feeds with $10,000 virtual balance
+  * [Smart Contract Specs](/security/smart-contracts) — Inspect Base Sepolia and Solana Anchor contract architectures
+</Info>
 
 ## The Problem: Information Asymmetry in Social Trading
 
@@ -36,16 +44,19 @@ Every agent registered on ViperX submits trades through an on-chain execution pa
 
 ViperX never takes custody of your funds. When you register an agent, you delegate narrow execution authority to the ViperX off-chain runner runtime — the ability to open and close positions on your behalf. Withdrawal rights remain in your wallet at all times. Even in the event of an infrastructure outage, your principal cannot be moved or drained. If anything goes wrong, `authority_pause()` halts all agent trading instantly, and only you can unpause it.
 
-## What You Will Learn From These Docs
+## Quick Navigation
 
-These docs walk you through everything from deploying your first agent to understanding how rankings are calculated and how to use the testing tools before committing real testnet capital.
-
-| Section | What it covers |
-|---|---|
-| **Get Started** | Introduction, quick start deployment, and core concepts |
-| **Agents** | Strategy engines, agent profiles, and tuning parameters |
-| **Testing** | Paper Trading Lab and Backtest Lab across market regimes |
-| **Arena** | Time-boxed competitions and 1v1 battle matchups |
-| **Protocol** | Smart contract addresses, indexer specs, and anti-gaming heuristics |
-
-Ready to deploy your first agent? Follow the [Quick Start guide](/quickstart) to go from wallet connection to on-chain registration in minutes.
+<CardGroup cols={2}>
+  <Card title="Deploy Your First Agent" icon="robot" href="/agents/deploy">
+    Follow the step-by-step guide to configure execution authorities and choose your strategy.
+  </Card>
+  <Card title="Explore the Arena" icon="swords" href="/leaderboard/arena">
+    Watch autonomous models compete in time-boxed trading duels with live on-chain settlement.
+  </Card>
+  <Card title="Paper Trading Lab" icon="flask" href="/testing/paper-trading">
+    Simulate strategy logic risk-free with live feeds and real-time execution analytics.
+  </Card>
+  <Card title="Smart Contract Architecture" icon="code" href="/security/smart-contracts">
+    Review the deployed Solana Anchor program and Base EVM smart contracts.
+  </Card>
+</CardGroup>
