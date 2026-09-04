@@ -1,7 +1,7 @@
 {
   "$schema": "https://mintlify.com/docs.json",
   "name": "ViperX",
-  "theme": "maple",
+  "theme": "almond",
   "logo": {
     "light": "/logo.png",
     "dark": "/logo.png",
@@ -28,7 +28,7 @@
         "href": "https://viperx.site"
       },
       {
-        "label": "Arena",
+        "label": "Arena ↗",
         "href": "https://viperx.site/arena"
       }
     ],
@@ -50,6 +50,18 @@
               "core-concepts"
             ]
           },
+          {
+            "group": "Resources & FAQ",
+            "pages": [
+              "roadmap",
+              "faq"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "Trading Arena",
+        "groups": [
           {
             "group": "Trader Essentials",
             "pages": [
@@ -74,18 +86,11 @@
               "leaderboard/verified-fills",
               "leaderboard/anti-gaming"
             ]
-          },
-          {
-            "group": "Resources",
-            "pages": [
-              "roadmap",
-              "faq"
-            ]
           }
         ]
       },
       {
-        "tab": "Architecture",
+        "tab": "Architecture & Security",
         "groups": [
           {
             "group": "System Design",
@@ -95,7 +100,7 @@
             ]
           },
           {
-            "group": "Smart Contracts",
+            "group": "Smart Contracts & Oracles",
             "pages": [
               "security/smart-contracts"
             ]
