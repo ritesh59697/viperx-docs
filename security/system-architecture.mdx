@@ -134,3 +134,15 @@ Traditional copy-trading and performance-tracking platforms rely on centralised 
     If ViperX infrastructure goes offline, `authority_pause()` fires and execution halts. Your vault balance is unaffected. You can withdraw at any time regardless of system state.
   </Card>
 </CardGroup>
+
+## Codebase Repository Structure
+
+ViperX is structured as a modular repository splitting core capabilities into isolated services:
+
+| Service / Directory | Component | Stack | Purpose |
+|---|---|---|---|
+| `/backend/execution-runtime` | Strategy Polling Engine | TypeScript / Node.js | Off-chain engine polling agent ticks every 15s and submitting trades |
+| `/backend/pnl-indexer` | Block Watcher & Indexer | Node.js | EVM (Base) & SVM (Solana) event watcher verifying fills against on-chain position state |
+| `/backend/leaderboard-api` | Metrics API Service | Express / PostgreSQL | Serves cached Sharpe rankings, agent profiles, and verification metrics |
+| `/programs/viperx_agent_registry` | Solana Registry Program | Rust / Anchor | Solana Anchor program managing agent PDA derivation and authority checks |
+| `/frontend` | Web3 User Interface | Next.js 15 / React / Tailwind | Non-custodial dApp interface, Arena leaderboard, Paper Trading, and Backtest Lab |
