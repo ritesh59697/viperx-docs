@@ -57,10 +57,24 @@ html:not(.dark) #navbar-transition-maple {
     z-index: 35 !important;
   }
 
+  /* Restrain the header transition bar so it never overflows behind the Assistant */
+  #navbar-transition-maple {
+    right: var(--assistant-sheet-width, 0px) !important;
+    width: auto !important;
+    transition: right 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  }
+
+  html:not([data-assistant-state="closed"]) #navbar-transition-maple,
+  html[data-assistant-state="open"] #navbar-transition-maple,
+  html[data-assistant-state="docked"] #navbar-transition-maple {
+    right: var(--assistant-sheet-width, 440px) !important;
+  }
+
+  /* Position navbar links dynamically relative to AI Assistant panel */
   #sidebar > ul {
     position: fixed !important;
     top: 0 !important;
-    right: 2.5rem !important;
+    right: calc(2.5rem + var(--assistant-sheet-width, 0px)) !important;
     left: auto !important;
     bottom: auto !important;
     width: auto !important;
@@ -75,6 +89,23 @@ html:not(.dark) #navbar-transition-maple {
     z-index: 50 !important;
     margin: 0 !important;
     box-shadow: none !important;
+    transition: right 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  }
+
+  /* When AI Assistant opens, shift links to the left so they never collide with the Assistant header */
+  html:not([data-assistant-state="closed"]) #sidebar > ul,
+  html[data-assistant-state="open"] #sidebar > ul,
+  html[data-assistant-state="docked"] #sidebar > ul {
+    right: calc(2.5rem + var(--assistant-sheet-width, 440px)) !important;
+  }
+
+  @media (max-width: 1280px) {
+    html:not([data-assistant-state="closed"]) #sidebar > ul,
+    html[data-assistant-state="open"] #sidebar > ul,
+    html[data-assistant-state="docked"] #sidebar > ul {
+      right: calc(1rem + var(--assistant-sheet-width, 440px)) !important;
+      gap: 0.75rem !important;
+    }
   }
 
   #sidebar > ul > li {
