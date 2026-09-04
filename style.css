@@ -52,6 +52,11 @@ html:not(.dark) #navbar-transition-maple {
    Desktop Navbar Actions: Dock GitHub and Launch App to Top-Right Header
    ────────────────────────────────────────────────────────────────────────── */
 @media (min-width: 1024px) {
+  /* Lift sidebar above navbar-transition-maple (z-20) so docked actions are visible and clickable */
+  nav#sidebar {
+    z-index: 35 !important;
+  }
+
   #sidebar > ul {
     position: fixed !important;
     top: 0 !important;

@@ -26,16 +26,12 @@
       {
         "href": "https://github.com/ritesh59697/ViperX",
         "label": "GitHub"
-      },
-      {
-        "href": "https://viperx.site",
-        "label": "Launch App ↗"
       }
     ],
     "primary": {
       "type": "button",
       "href": "https://viperx.site",
-      "label": "Launch App ↗"
+      "label": "Launch App \u2197"
     }
   },
   "navigation": {
