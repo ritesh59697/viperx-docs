@@ -36,19 +36,19 @@
   "navigation": {
     "tabs": [
       {
-        "tab": "Documentation",
+        "tab": "How It Works",
         "groups": [
           {
             "group": "Introduction",
             "pages": [
               "introduction",
-              "quickstart",
               "core-concepts"
             ]
           },
           {
-            "group": "Trader Essentials",
+            "group": "User Guides",
             "pages": [
+              "quickstart",
               "agents/deploy",
               "agents/dashboard",
               "testing/paper-trading",
@@ -72,6 +72,14 @@
             ]
           },
           {
+            "group": "System Architecture",
+            "pages": [
+              "security/system-architecture",
+              "security/non-custodial-model",
+              "security/smart-contracts"
+            ]
+          },
+          {
             "group": "Resources",
             "pages": [
               "roadmap",
@@ -81,19 +89,32 @@
         ]
       },
       {
-        "tab": "Architecture",
+        "tab": "System Specs",
         "groups": [
           {
-            "group": "System Design",
+            "group": "Smart Contracts",
+            "pages": [
+              "security/smart-contracts"
+            ]
+          },
+          {
+            "group": "System Architecture",
             "pages": [
               "security/system-architecture",
               "security/non-custodial-model"
             ]
           },
           {
-            "group": "Smart Contracts",
+            "group": "Verification Heuristics",
             "pages": [
-              "security/smart-contracts"
+              "leaderboard/anti-gaming",
+              "leaderboard/verified-fills"
+            ]
+          },
+          {
+            "group": "Resources",
+            "pages": [
+              "faq"
             ]
           }
         ]
