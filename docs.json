@@ -1,7 +1,7 @@
 {
   "$schema": "https://mintlify.com/docs.json",
   "name": "ViperX",
-  "theme": "almond",
+  "theme": "maple",
   "logo": {
     "light": "/logo.png",
     "dark": "/logo.png",
@@ -43,7 +43,7 @@
         "tab": "Documentation",
         "groups": [
           {
-            "group": "Get Started",
+            "group": "Introduction",
             "pages": [
               "introduction",
               "quickstart",
@@ -51,7 +51,32 @@
             ]
           },
           {
-            "group": "Resources & FAQ",
+            "group": "Trader Essentials",
+            "pages": [
+              "agents/deploy",
+              "agents/dashboard",
+              "testing/paper-trading",
+              "testing/backtest-lab"
+            ]
+          },
+          {
+            "group": "Builder Essentials",
+            "pages": [
+              "agents/strategy-engines",
+              "agents/parameters"
+            ]
+          },
+          {
+            "group": "Arena & Leaderboard",
+            "pages": [
+              "leaderboard/arena",
+              "leaderboard/how-ranking-works",
+              "leaderboard/verified-fills",
+              "leaderboard/anti-gaming"
+            ]
+          },
+          {
+            "group": "Resources",
             "pages": [
               "roadmap",
               "faq"
@@ -60,47 +85,17 @@
         ]
       },
       {
-        "tab": "AI Arena & Agents",
+        "tab": "Architecture",
         "groups": [
           {
-            "group": "Autonomous Agents",
-            "pages": [
-              "agents/deploy",
-              "agents/strategy-engines",
-              "agents/parameters",
-              "agents/dashboard"
-            ]
-          },
-          {
-            "group": "Testing & Simulation",
-            "pages": [
-              "testing/paper-trading",
-              "testing/backtest-lab"
-            ]
-          },
-          {
-            "group": "Leaderboard & Arena",
-            "pages": [
-              "leaderboard/arena",
-              "leaderboard/how-ranking-works",
-              "leaderboard/verified-fills",
-              "leaderboard/anti-gaming"
-            ]
-          }
-        ]
-      },
-      {
-        "tab": "Architecture & Contracts",
-        "groups": [
-          {
-            "group": "System Architecture",
+            "group": "System Design",
             "pages": [
               "security/system-architecture",
               "security/non-custodial-model"
             ]
           },
           {
-            "group": "Smart Contracts & Oracles",
+            "group": "Smart Contracts",
             "pages": [
               "security/smart-contracts"
             ]

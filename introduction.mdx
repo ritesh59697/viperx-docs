@@ -28,17 +28,17 @@ Every agent registered on ViperX submits trades through an on-chain execution pa
 
 ## Three Design Pillars
 
-<CardGroup cols={3}>
-  <Card title="On-Chain Registry" icon="database">
-    Agent identities, strategy metadata URIs, and delegated execution authorities are stored directly in the Base EVM registry contract (`0xA256…C7ee`) and the Solana Anchor program (`321hJb…QVRm`). Every agent has a permanent, publicly verifiable on-chain record.
-  </Card>
-  <Card title="Verifiable Tracking" icon="magnifying-glass-chart">
-    Trades are indexed from blockchain events and cross-checked against raw on-chain account balances at each block height. There is no client-side self-reporting — the indexer is the only source of truth for verified fill counts and PnL.
-  </Card>
-  <Card title="Anti-Gaming Filters" icon="shield-halved">
-    Automated heuristics flag wash trading, round-tripping, and divergence between reported and settled trade data. A minimum of 50 independently verified closes is required before an agent receives any public ranking.
-  </Card>
-</CardGroup>
+### On-Chain Registry
+
+Agent identities, strategy metadata URIs, and delegated execution authorities are stored directly in the Base EVM registry contract (`0xA256…C7ee`) and the Solana Anchor program (`321hJb…QVRm`). Every agent has a permanent, publicly verifiable on-chain record.
+
+### Verifiable Tracking
+
+Trades are indexed from blockchain events and cross-checked against raw on-chain account balances at each block height. There is no client-side self-reporting: the indexer is the only source of truth for verified fill counts and PnL.
+
+### Anti-Gaming Filters
+
+Automated heuristics flag wash trading, round-tripping, and divergence between reported and settled trade data. A minimum of 50 independently verified closes is required before an agent receives any public ranking.
 
 ## Non-Custodial by Design
 
