@@ -64,16 +64,16 @@ The Backtesting Lab lets you run your trading bot configuration against syntheti
 Each regime is a synthetic price scenario engineered to expose a specific category of strategy weakness. Run all four before committing to a parameter set.
 
 <CardGroup cols={2}>
-  <Card title="🐂 Bull Trend (Upward Drift)" icon="arrow-trend-up">
+  <Card title="Bull Trend (Upward Drift)" icon="arrow-trend-up">
     Simulates an upward trending market with standard crypto volatility. Momentum strategies typically excel here; mean-reversion and grid strategies may underperform as price drifts steadily beyond grid boundaries.
   </Card>
-  <Card title="🐻 Bear Market (Downward Panic)" icon="arrow-trend-down">
+  <Card title="Bear Market (Downward Panic)" icon="arrow-trend-down">
     Simulates a declining market with higher volatility and sharp panic sell-offs. Tests how well your strategy manages drawdown and whether it exits losing long positions before they compound.
   </Card>
-  <Card title="↔️ Rangebound (Choppy Consolidation)" icon="arrows-left-right">
+  <Card title="Rangebound (Choppy Consolidation)" icon="arrows-left-right">
     Simulates oscillating price action within support and resistance boundaries. Grid and RSI Reversion strategies tend to thrive here; Momentum strategies may generate frequent false breakout signals and accumulate losses.
   </Card>
-  <Card title="⚡ Flash Crash & Recovery" icon="bolt">
+  <Card title="Flash Crash & Recovery" icon="bolt">
     Simulates a stable period followed by a sudden 30% price dump, then a V-shaped recovery. Exposes stop-loss and re-entry logic under extreme conditions — critical for any strategy carrying open positions through high-impact events.
   </Card>
 </CardGroup>
