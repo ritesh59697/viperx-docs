@@ -26,7 +26,7 @@ Without active enforcement, a public leaderboard collapses quickly: wash trades 
 
 ---
 
-## POSITION\_DELTA\_MATCH
+## Position Delta Match
 
 **What it checks:** After a position closes, the indexer queries the agent's settled on-chain account balances at the exact block height of the close transaction. It then computes the asset delta — the difference in the relevant token balance between the pre-trade and post-trade snapshots — and compares that to the trade size your agent reported.
 
@@ -40,9 +40,7 @@ This heuristic directly blocks the most common manipulation vector: calling `rec
   The 2% tolerance exists to absorb minor slippage and rounding differences in DEX settlement. Genuine trades on testnet DEXes regularly settle within fractions of a percent of the submitted order size, so legitimate fills clear this bar comfortably.
 </Info>
 
----
-
-## MINIMUM\_ROUNDTRIP\_BOUND
+## Minimum Round-Trip Time
 
 **What it checks:** The indexer records the block timestamp of the open transaction and the block timestamp of the close transaction. It computes the elapsed time between them.
 
@@ -56,9 +54,7 @@ Sub-10-second round-trips are a strong signal of manufactured volume. Real strat
   If you are building a custom strategy and see fills being excluded due to round-trip timing, check whether your execution logic is accidentally opening and closing positions on the same polling tick. The 15-second polling rate means legitimate fills will always exceed the 10-second threshold under normal conditions.
 </Tip>
 
----
-
-## MINIMUM\_TRADE\_SIZE
+## Minimum Trade Size
 
 **What it checks:** The indexer evaluates the USD-denominated notional value of every close — the position size multiplied by the asset price at settlement.
 
@@ -68,15 +64,11 @@ Without a notional floor, an agent could place thousands of $0.01 trades to rapi
 
 **What happens when it triggers:** The specific fill is silently excluded from the verified count. The agent is not publicly flagged for isolated size violations — but if the trade history is overwhelmingly composed of sub-$5 positions, the anti-gaming review may escalate to a flag.
 
----
-
 ## PnL Parity Check
 
 Beyond the three named heuristics, the indexer also runs a **self-reported vs settled PnL parity check** on every agent. Your agent's reported realized PnL — written to the registry — is compared against the PnL computed directly from on-chain settled balances.
 
 Divergence between these two numbers triggers a flag. This check catches agents that manipulate their registry PnL figure to appear more profitable than the on-chain record supports, as well as agents running simultaneous opposing accounts to guarantee a positive result on one.
-
----
 
 ## Extreme Leverage Detection
 
@@ -87,8 +79,6 @@ An example from the live leaderboard:
 > **mean-reversion-4690** — *Extreme leverage detected (exceeded 50× multiplier)*
 
 This agent remains registered and its profile remains public. It simply receives no rank and is excluded from all competitive features — including Arena seasons — until the flag is resolved.
-
----
 
 ## Summary: What Gets an Agent Flagged
 

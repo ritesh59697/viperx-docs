@@ -1,5 +1,5 @@
 ---
-title: "Register and Deploy a Trading Agent on ViperX"
+title: "Register and Deploy a Trading Agent on ViperX Testnet"
 sidebarTitle: "Deploy an Agent"
 description: "Register a trading agent on Base Sepolia or Solana Devnet in one transaction. The runtime picks it up and starts placing verified on-chain trades."
 ---
@@ -69,24 +69,35 @@ Before connecting your wallet, decide whether you want your agent to trade on-ch
   </Step>
 
   <Step title="Sign the Registration Transaction">
-    Click **Register Agent**. Your wallet prompts you to sign a single transaction that writes your agent's identity to the registry contract. Confirm the transaction in your wallet.
+    Click **Register Agent**. Your wallet prompts you to sign a transaction that calls `register_agent` on the registry contract, writing your agent's identity permanently on-chain. Confirm the transaction in your wallet.
 
-    - On **Base Sepolia**, the transaction is submitted to the ViperX Agent Registry contract at `0xA256D01Ca6e89c5B6bDf34F3dd68eBfF47f2C7ee`.
-    - On **Solana Devnet**, the transaction creates a Program Derived Address (PDA) via the ViperX Anchor program at `321hJbttyyeZ8pzisiKB93a5XdopV2N6n2gtvwrdQVRm`.
+    - On **Base Sepolia**, `register_agent` is submitted to the ViperX Agent Registry contract at `0xA256D01Ca6e89c5B6bDf34F3dd68eBfF47f2C7ee`.
+    - On **Solana Devnet**, `register_agent` creates a Program Derived Address (PDA) via the ViperX Anchor program at `321hJbttyyeZ8pzisiKB93a5XdopV2N6n2gtvwrdQVRm`.
 
-    Once confirmed, your agent is live on-chain and immediately visible in the registry.
+    Once confirmed, your agent's identity is live on-chain and immediately visible in the registry.
+  </Step>
+
+  <Step title="Grant Execution Authority">
+    After registration confirms, sign a second transaction that calls `delegate_authority`. This grants the ViperX off-chain runtime the right to submit trade transactions and invoke the `authority_pause()` circuit breaker on your agent's behalf.
+
+    <Note>
+      `delegate_authority` is narrowly scoped to trade execution and circuit-breaker invocation only. It never grants withdrawal rights, token transfer approvals, or any ability to move your principal out of the vault.
+    </Note>
+
+    Once `delegate_authority` confirms, the runtime can begin executing your strategy automatically on the next 15-second polling tick.
   </Step>
 </Steps>
 
 ## What Happens After Registration
 
-After your transaction confirms, the ViperX execution runtime picks up your agent automatically:
+After both transactions confirm, the ViperX execution runtime picks up your agent automatically:
 
 1. **Polling begins** — the runtime fetches your strategy configuration from the registry (and your Strategy URI if provided) every **15 seconds**.
 2. **Trades execute** — based on your strategy engine's signals, the runtime submits buy and sell orders through decentralized exchanges on your chosen network.
-3. **Fills are recorded** — each completed trade is written on-chain with a transaction signature, creating an immutable execution record.
-4. **Indexer verification** — the ViperX indexer cross-references each fill against actual on-chain position state. Fills that pass anti-gaming heuristics increment your verified fill count.
-5. **Leaderboard eligibility** — once you accumulate **50 independently verified fills**, your agent becomes eligible for leaderboard ranking by Sharpe-like ratio.
+3. **Fills are recorded** — each completed trade is written on-chain via `record_trade`, creating an immutable execution record with a transaction signature.
+4. **Indexer verification** — the ViperX PnL Indexer cross-references each `record_trade` call against actual on-chain position state. Fills that pass anti-gaming heuristics increment your verified fill count.
+5. **Circuit breaker** — if the runtime detects repeated reverts or out-of-profile attempts, it automatically invokes `authority_pause()` to halt execution. You can also trigger this manually from your [Wallet Dashboard](/agents/dashboard) at any time.
+6. **Leaderboard eligibility** — once you accumulate **50 independently verified fills**, your agent becomes eligible for leaderboard ranking by Sharpe-like ratio.
 
 <Info>
   The leaderboard ranks by volatility-adjusted Sharpe ratio, not raw PnL. A high-leverage lucky trade cannot outrank consistent risk-managed returns. See [How the Leaderboard Works](/leaderboard) for the full ranking methodology.

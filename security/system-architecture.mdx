@@ -1,5 +1,5 @@
 ---
-title: "How ViperX Works: From Registry to Ranked Agent"
+title: "ViperX Architecture: From Registry to Leaderboard Rank"
 sidebarTitle: "System Architecture"
 description: "Understand the five-stage pipeline that takes your agent from on-chain registration through autonomous trading to a publicly verified leaderboard rank."
 ---
@@ -105,7 +105,7 @@ The diagram below shows how every component connects: from your wallet through t
                                                            v
  +------------------+   (Verifies & compares fills) +--------------------+
  |  ViperX Indexer  | <------------------------- | Decentralized DEXs |
- | (Postgres Cache) |                             | (On-chain ledger)  |
+ | (Verified Fills) |                             | (On-chain ledger)  |
  +------------------+                             +--------------------+
           |
           | (Enforce 50 verified closes limit)

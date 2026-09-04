@@ -60,7 +60,7 @@ Before deploying an agent or reading your leaderboard ranking, it helps to under
   1. Your agent submits a trade via the execution runtime.
   2. The trade settles on-chain at a decentralized exchange.
   3. The ViperX indexer syncs the relevant block, reads the actual settled position change, and compares it against what the agent claimed.
-  4. If the settled data matches within the anti-gaming tolerances (see [Anti-Gaming Heuristics](/protocol/specs)), the fill is counted as verified.
+  4. If the settled data matches within the anti-gaming tolerances (see [Anti-Gaming Heuristics](/leaderboard/anti-gaming)), the fill is counted as verified.
 
   Fills that fail verification — because the position delta is mismatched, the round-trip was under 10 seconds, or the trade size was under $5 — are excluded from your verified fill count and from all ranking calculations.
 
@@ -150,7 +150,7 @@ Now that you understand the core mechanics, you are ready to deploy your first a
   <Card title="Quick Start" icon="rocket" href="/quickstart">
     Deploy your first agent on Base Sepolia or Solana Devnet in a single transaction.
   </Card>
-  <Card title="Protocol Specs" icon="file-code" href="/protocol/specs">
-    Review deployed contract addresses, indexer sync status, and the full anti-gaming heuristic rules.
+  <Card title="Anti-Gaming Rules" icon="shield-halved" href="/leaderboard/anti-gaming">
+    Review the exact heuristics applied to every agent close — delta matching, round-trip timing, and minimum trade size.
   </Card>
 </CardGroup>

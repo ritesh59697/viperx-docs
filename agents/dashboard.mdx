@@ -1,5 +1,5 @@
 ---
-title: "Monitor Your Agents from the ViperX Dashboard"
+title: "Monitor Your ViperX Agents from the Wallet Dashboard"
 sidebarTitle: "Dashboard"
 description: "Monitor agent ROI, Sharpe ratio, and drawdown, read the PnL trajectory chart, tune strategy parameters, and verify on-chain fills from one workspace."
 ---
@@ -51,7 +51,7 @@ The agent profile page shows a comprehensive set of performance and status metri
 | **Anti-Gaming Status** | Whether the agent has triggered any wash-trading or heuristic flags |
 
 <Info>
-  Metrics are sourced from the ViperX indexer, which syncs blocks continuously and cross-references self-reported fills against independent on-chain settled position changes. You are always looking at verified data, not self-reported statistics.
+  Metrics are sourced from the ViperX PnL Indexer, which syncs blocks continuously and cross-references self-reported fills against independent on-chain settled position changes. Leaderboard ranks are served by the Leaderboard API, which reads directly from the same verified, indexer-confirmed data. You are always looking at verified data, not self-reported statistics.
 </Info>
 
 ### Skills Badges
@@ -62,14 +62,14 @@ Beneath the core metrics, the profile displays any **Skills** badges the agent h
 - **Disciplined** — Sharpe-like ratio above 1.0 with 20 or more real trades
 - **Risk-Aware** — Max drawdown below 10% with 20 or more real trades
 
-Badges update automatically as the indexer processes new verified fills. See the [Parameters Reference](/agents/parameters) for the full badge unlock criteria.
+Badges update automatically as the PnL Indexer processes new verified fills. See the [Parameters Reference](/agents/parameters) for the full badge unlock criteria.
 
 ## Performance Trajectory Chart
 
-The **Performance Trajectory** section of the profile displays a time-series chart of your agent's PnL history, built from periodic on-chain snapshots taken by the indexer.
+The **Performance Trajectory** section of the profile displays a time-series chart of your agent's PnL history, built from periodic on-chain snapshots taken by the PnL Indexer.
 
 <Accordion title="How to read the Performance Trajectory chart">
-  - **X-axis** — time, with each data point representing a PnL snapshot recorded by the indexer at a specific block height
+  - **X-axis** — time, with each data point representing a PnL snapshot recorded by the PnL Indexer at a specific block height
   - **Y-axis** — value in USD (Realized PnL) or percentage (ROI / Max Drawdown), depending on which metric you have selected
   - **Toggle** — use the **Realized PnL / ROI / Max Drawdown** toggle above the chart to switch between views
   - **Trend line** — a rising line indicates cumulative realized gains; a flat line means no new positions have closed since the last snapshot
@@ -112,6 +112,26 @@ To adjust your agent's strategy parameters after deployment:
 <Warning>
   Only the vault owner address can tune strategy parameters. If you set a custom Vault Address at registration, you must connect that wallet to make changes.
 </Warning>
+
+## Emergency Pause
+
+The **Pause Agent** button on your agent's profile triggers `authority_pause()` — an on-chain circuit breaker that immediately halts all trade execution for your agent. Use this if market conditions deteriorate unexpectedly or you need to stop the runtime while you adjust parameters.
+
+<Steps>
+  <Step title="Open the Agent Profile">
+    Click the agent card on the dashboard to open its full profile page.
+  </Step>
+  <Step title="Click Pause Agent">
+    Select the **Pause Agent** button and confirm the action in your wallet. This invokes `authority_pause()` on-chain, instantly stopping the execution runtime from submitting any further trade transactions for this agent.
+  </Step>
+  <Step title="Resume When Ready">
+    To resume execution, click **Resume Agent** and sign the unpause transaction. Only the vault owner wallet can unpause — the ViperX team and runtime cannot resume execution on your behalf.
+  </Step>
+</Steps>
+
+<Info>
+  `authority_pause()` also fires automatically if the runtime detects repeated transaction reverts or out-of-profile trade attempts. When this happens, an entry is written to the Tuning Log with the reason for the automatic pause.
+</Info>
 
 ## Copy This Agent
 
