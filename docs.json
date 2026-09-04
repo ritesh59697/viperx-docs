@@ -1,11 +1,10 @@
 {
   "$schema": "https://mintlify.com/docs.json",
   "name": "ViperX",
-  "theme": "maple",
   "logo": {
     "light": "/logo-light.svg",
     "dark": "/logo-dark.svg",
-    "href": "https://viperx.site"
+    "href": "/"
   },
   "favicon": "/logo.png",
   "colors": {

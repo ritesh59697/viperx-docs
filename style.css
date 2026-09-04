@@ -1,5 +1,5 @@
 /* ──────────────────────────────────────────────────────────────────────────
-   ViperX Documentation Theme Styles
+   ViperX Documentation Theme Styles (Monad-Style Clean Obsidian Layout)
    ────────────────────────────────────────────────────────────────────────── */
 
 /* Dark mode: solid obsidian black background (#000000) with zero red ambient glow */
@@ -10,11 +10,16 @@ html.dark main,
 html.dark [data-docs-theme],
 html.dark #background-color,
 html.dark [id*="background-color"],
-html.dark #navbar-transition,
-html.dark #navbar-transition-maple {
+html.dark #navbar,
+html.dark header#navbar {
   background-color: #000000 !important;
   background: #000000 !important;
   background-image: none !important;
+}
+
+/* Subtle bottom border on header in dark mode matching Monad */
+html.dark header#navbar {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
 }
 
 /* Eliminate any ambient radial gradient glow pseudo-elements in dark mode */
@@ -25,7 +30,9 @@ html.dark main::after,
 html.dark #content-area::before,
 html.dark #content-area::after,
 html.dark [data-docs-theme]::before,
-html.dark [data-docs-theme]::after {
+html.dark [data-docs-theme]::after,
+html.dark header#navbar::before,
+html.dark header#navbar::after {
   display: none !important;
   background: none !important;
   background-image: none !important;
@@ -42,147 +49,84 @@ html:not(.dark) main {
 
 html:not(.dark) #background-color,
 html:not(.dark) [id*="background-color"],
-html:not(.dark) #navbar-transition,
-html:not(.dark) #navbar-transition-maple {
+html:not(.dark) #navbar,
+html:not(.dark) header#navbar {
   background-color: #ffffff !important;
   background-image: none !important;
+}
+
+html:not(.dark) header#navbar {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08) !important;
 }
 
 /* ──────────────────────────────────────────────────────────────────────────
    Desktop Navbar Actions: Clean Monad-Style Minimal Text Links (Blog ↗ / Try Monad ↗)
    ────────────────────────────────────────────────────────────────────────── */
-@media (min-width: 1024px) {
-  /* Lift sidebar stacking context above navbar-transition-maple (z-20) */
-  nav#sidebar {
-    z-index: 35 !important;
-  }
+.navbar-link {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+}
 
-  /* Restrain the header transition bar so it never overflows behind the Assistant */
-  #navbar-transition-maple {
-    right: var(--assistant-sheet-width, 0px) !important;
-    width: auto !important;
-    transition: right 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
-  }
+.navbar-link a {
+  font-size: 0.875rem !important; /* 14px */
+  font-weight: 500 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 0.35rem !important;
+  text-decoration: none !important;
+  padding: 0.35rem 0.6rem !important;
+  border-radius: 0.375rem !important;
+  transition: color 0.15s ease, background-color 0.15s ease !important;
+}
 
-  html:not([data-assistant-state="closed"]) #navbar-transition-maple,
-  html[data-assistant-state="open"] #navbar-transition-maple,
-  html[data-assistant-state="docked"] #navbar-transition-maple {
-    right: var(--assistant-sheet-width, 440px) !important;
-  }
+/* Dark mode: clean muted text matching Monad */
+html.dark .navbar-link a {
+  background: transparent !important;
+  border: none !important;
+  color: #a1a1aa !important; /* zinc-400 */
+}
 
-  /* Position navbar links dynamically relative to AI Assistant panel */
-  #sidebar > ul {
-    position: fixed !important;
-    top: 0 !important;
-    right: calc(2.5rem + var(--assistant-sheet-width, 0px)) !important;
-    left: auto !important;
-    bottom: auto !important;
-    width: auto !important;
-    height: 3rem !important;
-    display: flex !important;
-    flex-direction: row !important;
-    align-items: center !important;
-    gap: 1.5rem !important;
-    border: none !important;
-    background: transparent !important;
-    padding: 0 !important;
-    z-index: 50 !important;
-    margin: 0 !important;
-    box-shadow: none !important;
-    transition: right 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
-  }
+html.dark .navbar-link a:hover {
+  background: rgba(255, 255, 255, 0.08) !important;
+  color: #ffffff !important;
+}
 
-  /* When AI Assistant opens, shift links to the left so they never collide with the Assistant header */
-  html:not([data-assistant-state="closed"]) #sidebar > ul,
-  html[data-assistant-state="open"] #sidebar > ul,
-  html[data-assistant-state="docked"] #sidebar > ul {
-    right: calc(2.5rem + var(--assistant-sheet-width, 440px)) !important;
-  }
+html.dark .navbar-link a svg {
+  color: #a1a1aa !important;
+  stroke: currentColor !important;
+  width: 0.75rem !important;
+  height: 0.75rem !important;
+  transition: color 0.15s ease !important;
+}
 
-  @media (max-width: 1280px) {
-    html:not([data-assistant-state="closed"]) #sidebar > ul,
-    html[data-assistant-state="open"] #sidebar > ul,
-    html[data-assistant-state="docked"] #sidebar > ul {
-      right: calc(1rem + var(--assistant-sheet-width, 440px)) !important;
-      gap: 0.75rem !important;
-    }
-  }
+html.dark .navbar-link a:hover svg {
+  color: #ffffff !important;
+  stroke: currentColor !important;
+}
 
-  #sidebar > ul > li {
-    display: inline-flex !important;
-    align-items: center !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    scroll-margin: 0 !important;
-    border: none !important;
-    background: transparent !important;
-  }
+/* Light mode: clean muted text matching Monad */
+html:not(.dark) .navbar-link a {
+  background: transparent !important;
+  border: none !important;
+  color: #71717a !important; /* zinc-500 */
+}
 
-  #sidebar > ul a {
-    padding: 0 !important;
-    background: transparent !important;
-    border: none !important;
-    border-radius: 0 !important;
-    font-size: 0.875rem !important; /* 14px */
-    font-weight: 500 !important;
-    display: inline-flex !important;
-    align-items: center !important;
-    gap: 0.35rem !important;
-    line-height: 1 !important;
-    text-decoration: none !important;
-    box-shadow: none !important;
-    transition: color 0.15s ease !important;
-  }
+html:not(.dark) .navbar-link a:hover {
+  background: rgba(0, 0, 0, 0.05) !important;
+  color: #09090b !important;
+}
 
-  /* Dark mode: clean muted text matching Monad (Image 2) */
-  html.dark #sidebar > ul a {
-    background: transparent !important;
-    border: none !important;
-    color: #a1a1aa !important; /* zinc-400 */
-  }
+html:not(.dark) .navbar-link a svg {
+  color: #71717a !important;
+  stroke: currentColor !important;
+  width: 0.75rem !important;
+  height: 0.75rem !important;
+  transition: color 0.15s ease !important;
+}
 
-  html.dark #sidebar > ul a:hover {
-    background: transparent !important;
-    border: none !important;
-    color: #ffffff !important;
-  }
-
-  html.dark #sidebar > ul a svg {
-    color: #a1a1aa !important;
-    stroke: currentColor !important;
-    width: 0.75rem !important;
-    height: 0.75rem !important;
-    transition: color 0.15s ease !important;
-  }
-
-  html.dark #sidebar > ul a:hover svg {
-    color: #ffffff !important;
-    stroke: currentColor !important;
-  }
-
-  /* Light mode: clean muted text matching Monad */
-  html:not(.dark) #sidebar > ul a {
-    background: transparent !important;
-    border: none !important;
-    color: #71717a !important; /* zinc-500 */
-  }
-
-  html:not(.dark) #sidebar > ul a:hover {
-    background: transparent !important;
-    border: none !important;
-    color: #09090b !important;
-  }
-
-  html:not(.dark) #sidebar > ul a svg {
-    color: #71717a !important;
-    stroke: currentColor !important;
-    width: 0.75rem !important;
-    height: 0.75rem !important;
-    transition: color 0.15s ease !important;
-  }
-
-  html:not(.dark) #sidebar > ul a:hover svg {
-    color: #09090b !important;
-    stroke: currentColor !important;
-  }
+html:not(.dark) .navbar-link a:hover svg {
+  color: #09090b !important;
+  stroke: currentColor !important;
 }
