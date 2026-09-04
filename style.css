@@ -1,33 +1,142 @@
-/* Pure solid obsidian black background - zero ambient red tint or glow */
-:root.dark,
-.dark,
+/* ──────────────────────────────────────────────────────────────────────────
+   ViperX Documentation Theme Styles
+   ────────────────────────────────────────────────────────────────────────── */
+
+/* Dark mode: solid obsidian black background (#000000) with zero red ambient glow */
 html.dark,
-body,
-#content-area,
-main,
-[data-docs-theme] {
+html.dark body,
+html.dark #content-area,
+html.dark main,
+html.dark [data-docs-theme],
+html.dark #background-color,
+html.dark [id*="background-color"],
+html.dark #navbar-transition,
+html.dark #navbar-transition-maple {
   background-color: #000000 !important;
   background: #000000 !important;
-}
-
-#background-color,
-[id*="background-color"],
-#navbar-transition,
-#navbar-transition-maple {
-  background-color: #000000 !important;
   background-image: none !important;
 }
 
-/* Eliminate any ambient radial gradient glow pseudo-elements */
-body::before,
-body::after,
-main::before,
-main::after,
-#content-area::before,
-#content-area::after,
-[data-docs-theme]::before,
-[data-docs-theme]::after {
+/* Eliminate any ambient radial gradient glow pseudo-elements in dark mode */
+html.dark body::before,
+html.dark body::after,
+html.dark main::before,
+html.dark main::after,
+html.dark #content-area::before,
+html.dark #content-area::after,
+html.dark [data-docs-theme]::before,
+html.dark [data-docs-theme]::after {
   display: none !important;
   background: none !important;
   background-image: none !important;
+}
+
+/* Light mode: clean, crisp high-contrast white background */
+html:not(.dark),
+html:not(.dark) body,
+html:not(.dark) #content-area,
+html:not(.dark) main {
+  background-color: #ffffff !important;
+  background: #ffffff !important;
+}
+
+html:not(.dark) #background-color,
+html:not(.dark) [id*="background-color"],
+html:not(.dark) #navbar-transition,
+html:not(.dark) #navbar-transition-maple {
+  background-color: #ffffff !important;
+  background-image: none !important;
+}
+
+/* ──────────────────────────────────────────────────────────────────────────
+   Desktop Navbar Actions: Dock GitHub and Launch App to Top-Right Header
+   ────────────────────────────────────────────────────────────────────────── */
+@media (min-width: 1024px) {
+  #sidebar > ul {
+    position: fixed !important;
+    top: 0 !important;
+    right: 2.5rem !important;
+    left: auto !important;
+    bottom: auto !important;
+    width: auto !important;
+    height: 3rem !important;
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    gap: 0.75rem !important;
+    border: none !important;
+    background: transparent !important;
+    padding: 0 !important;
+    z-index: 50 !important;
+    margin: 0 !important;
+  }
+
+  #sidebar > ul > li {
+    display: inline-flex !important;
+    align-items: center !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    scroll-margin: 0 !important;
+  }
+
+  #sidebar > ul a {
+    padding: 0.35rem 0.85rem !important;
+    border-radius: 0.5rem !important;
+    font-size: 0.825rem !important;
+    font-weight: 500 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 0.35rem !important;
+    line-height: 1.25 !important;
+    text-decoration: none !important;
+    transition: all 0.15s ease !important;
+  }
+
+  /* Dark mode links */
+  html.dark #sidebar > ul a {
+    background: rgba(255, 255, 255, 0.06) !important;
+    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    color: #e4e4e7 !important;
+  }
+
+  html.dark #sidebar > ul a:hover {
+    background: rgba(255, 255, 255, 0.12) !important;
+    color: #ffffff !important;
+    border-color: rgba(255, 255, 255, 0.2) !important;
+  }
+
+  /* Light mode links */
+  html:not(.dark) #sidebar > ul a {
+    background: rgba(0, 0, 0, 0.04) !important;
+    border: 1px solid rgba(0, 0, 0, 0.1) !important;
+    color: #27272a !important;
+  }
+
+  html:not(.dark) #sidebar > ul a:hover {
+    background: rgba(0, 0, 0, 0.08) !important;
+    color: #09090b !important;
+    border-color: rgba(0, 0, 0, 0.18) !important;
+  }
+
+  /* Accent styling for Launch App button */
+  #sidebar > ul li[data-title*="Launch"] a,
+  #sidebar > ul li[id*="viperx.site"] a {
+    background: #FF4D26 !important;
+    color: #ffffff !important;
+    border: 1px solid #FF4D26 !important;
+    font-weight: 600 !important;
+  }
+
+  #sidebar > ul li[data-title*="Launch"] a svg,
+  #sidebar > ul li[id*="viperx.site"] a svg {
+    color: #ffffff !important;
+    stroke: #ffffff !important;
+  }
+
+  #sidebar > ul li[data-title*="Launch"] a:hover,
+  #sidebar > ul li[id*="viperx.site"] a:hover {
+    background: #e63e18 !important;
+    border-color: #e63e18 !important;
+    opacity: 0.95 !important;
+  }
 }

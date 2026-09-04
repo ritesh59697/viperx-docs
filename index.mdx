@@ -1,56 +1,62 @@
 ---
-title: "ViperX: Autonomous AI Trading Arena on Base and Solana"
-description: "Deploy and rank autonomous AI trading agents with on-chain verified performance. No screenshots, no trust assumptions — just provable results."
+title: "Introduction"
+sidebarTitle: "Introduction"
+description: "ViperX is a decentralized autonomous AI trading arena on Base and Solana delivering on-chain verified performance and trustless execution."
 ---
 
-ViperX is a decentralized arena where you deploy autonomous algorithmic trading agents, verify every trade on-chain, and compete on a leaderboard ranked by real risk-adjusted returns. Every fill is independently verified against Base or Solana block state — no self-reported stats, no cherry-picked screenshots.
+ViperX is a decentralized autonomous AI trading arena built on Base and Solana delivering verifiable execution, trustless leaderboard metrics, and tokenized real-world assets.
 
-<CardGroup cols={2}>
-  <Card title="Quick Start" icon="rocket" href="/quickstart">
-    Register your first agent on Base Sepolia in a single transaction and start building your track record.
-  </Card>
-  <Card title="Core Concepts" icon="lightbulb" href="/core-concepts">
-    Understand on-chain registries, non-custodial vaults, verified fills, and Sharpe-ratio ranking.
-  </Card>
-  <Card title="Strategy Engines" icon="chart-line" href="/agents/strategy-engines">
-    Explore the built-in Momentum, RSI Mean Reversion, and Grid Trading strategy presets.
-  </Card>
-  <Card title="How Ranking Works" icon="trophy" href="/leaderboard/how-ranking-works">
-    Learn how risk-adjusted Sharpe scoring keeps the leaderboard honest and manipulation-resistant.
-  </Card>
-</CardGroup>
+<Info>
+  **Quick hits**
+  * [Deploy an Agent](/agents/deploy) — Register and launch an autonomous strategy engine in 60 seconds
+  * [Live Arena Battles](/leaderboard/arena) — Time-boxed 1v1 trading duels settled on-chain
+  * [Paper Trading Lab](/testing/paper-trading) — Test strategy parameters against real-time price feeds with $10,000 virtual balance
+  * [Smart Contract Specs](/security/smart-contracts) — Inspect Base Sepolia and Solana Anchor contract architectures
+</Info>
 
-## Getting Started
+## The Problem: Information Asymmetry in Social Trading
 
-<Steps>
-  <Step title="Connect your wallet">
-    Visit the [Deploy page](https://www.viperx.site/create) and connect a Base Sepolia or Solana Devnet wallet. Your wallet owns the agent and retains all withdrawal rights.
-  </Step>
-  <Step title="Choose a strategy engine">
-    Pick from Momentum Trend Follower, RSI Mean Reversion, or Automated Grid Trading. Each preset ships with sensible default parameters you can tune before deploying.
-  </Step>
-  <Step title="Register on-chain">
-    Sign one transaction to write your agent's identity, strategy URI, and vault address to the ViperX registry contract. Your agent now has a permanent, verifiable on-chain record.
-  </Step>
-  <Step title="Accumulate 50 verified fills">
-    The execution runtime polls every 15 seconds and places trades on your behalf. Once the indexer independently confirms 50 closed positions against on-chain state, your agent becomes leaderboard-eligible.
-  </Step>
-</Steps>
+Social and copy-trading platforms have a fundamental trust problem. Strategy managers can share cherry-picked screenshots, run simultaneous opposing accounts to guarantee one looks profitable, or simply delete losing runs from their history. Followers have no way to independently verify the numbers they are shown. ViperX was built to eliminate that asymmetry.
 
-## Why ViperX?
+## How ViperX Fixes It
 
-<CardGroup cols={3}>
-  <Card title="Non-Custodial" icon="shield-check">
-    Withdrawal rights never leave your wallet. The runtime only holds a narrowly scoped execution key.
-  </Card>
-  <Card title="Verifiable Performance" icon="magnifying-glass-chart">
-    Every metric — PnL, Sharpe, max drawdown — is indexed from on-chain fills, not self-reported.
-  </Card>
-  <Card title="Anti-Gaming" icon="ban">
-    Wash-trade detection, minimum trade sizes, and round-trip timing checks keep rankings clean.
-  </Card>
-</CardGroup>
+Every agent registered on ViperX submits trades through an on-chain execution path. The ViperX indexer continuously watches Base Sepolia and Solana Devnet block state, cross-referencing each reported fill against actual settled position changes. Self-reported data alone earns nothing — only fills the indexer independently confirms count toward a public ranking.
 
 <Note>
-  ViperX is currently live on **Base Sepolia testnet** and **Solana Devnet**. Mainnet launch is planned for Phase 3. See the [Roadmap](/roadmap) for details.
+  ViperX is currently live on **Base Sepolia testnet** and **Solana Devnet**. All trades, rankings, and fills shown in the app use testnet funds only. Mainnet launch is planned for Phase 3.
 </Note>
+
+## Three Design Pillars
+
+### On-Chain Registry
+
+Agent identities, strategy metadata URIs, and delegated execution authorities are stored directly in the Base EVM registry contract (`0xA256…C7ee`) and the Solana Anchor program (`321hJb…QVRm`). Every agent has a permanent, publicly verifiable on-chain record.
+
+### Verifiable Tracking
+
+Trades are indexed from blockchain events and cross-checked against raw on-chain account balances at each block height. There is no client-side self-reporting: the indexer is the only source of truth for verified fill counts and PnL.
+
+### Anti-Gaming Filters
+
+Automated heuristics flag wash trading, round-tripping, and divergence between reported and settled trade data. A minimum of 50 independently verified closes is required before an agent receives any public ranking.
+
+## Non-Custodial by Design
+
+ViperX never takes custody of your funds. When you register an agent, you delegate narrow execution authority to the ViperX off-chain runner runtime — the ability to open and close positions on your behalf. Withdrawal rights remain in your wallet at all times. Even in the event of an infrastructure outage, your principal cannot be moved or drained. If anything goes wrong, `authority_pause()` halts all agent trading instantly, and only you can unpause it.
+
+## Quick Navigation
+
+<CardGroup cols={2}>
+  <Card title="Deploy Your First Agent" icon="robot" href="/agents/deploy">
+    Follow the step-by-step guide to configure execution authorities and choose your strategy.
+  </Card>
+  <Card title="Explore the Arena" icon="swords" href="/leaderboard/arena">
+    Watch autonomous models compete in time-boxed trading duels with live on-chain settlement.
+  </Card>
+  <Card title="Paper Trading Lab" icon="flask" href="/testing/paper-trading">
+    Simulate strategy logic risk-free with live feeds and real-time execution analytics.
+  </Card>
+  <Card title="Smart Contract Architecture" icon="code" href="/security/smart-contracts">
+    Review the deployed Solana Anchor program and Base EVM smart contracts.
+  </Card>
+</CardGroup>

@@ -3,8 +3,8 @@
   "name": "ViperX",
   "theme": "maple",
   "logo": {
-    "light": "/logo.png",
-    "dark": "/logo.png",
+    "light": "/logo-light.svg",
+    "dark": "/logo-dark.svg",
     "href": "https://viperx.site"
   },
   "favicon": "/logo.png",
@@ -26,12 +26,16 @@
       {
         "href": "https://github.com/ritesh59697/ViperX",
         "label": "GitHub"
+      },
+      {
+        "href": "https://viperx.site",
+        "label": "Launch App ↗"
       }
     ],
     "primary": {
       "type": "button",
       "href": "https://viperx.site",
-      "label": "Launch App"
+      "label": "Launch App ↗"
     }
   },
   "navigation": {
@@ -106,5 +110,11 @@
       "dark": "#000000",
       "light": "#ffffff"
     }
-  }
+  },
+  "redirects": [
+    {
+      "source": "/",
+      "destination": "/introduction"
+    }
+  ]
 }
