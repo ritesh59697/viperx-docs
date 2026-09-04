@@ -23,10 +23,12 @@
   "navbar": {
     "links": [
       {
+        "icon": "arrow-up-right",
         "href": "https://github.com/ritesh59697/ViperX",
         "label": "GitHub"
       },
       {
+        "icon": "arrow-up-right",
         "href": "https://viperx.site",
         "label": "Launch App"
       }
@@ -172,5 +174,8 @@
   "metadata": {
     "timestamp": true
   },
-  "theme": "almond"
+  "theme": "almond",
+  "icons": {
+    "library": "lucide"
+  }
 }
