@@ -49,10 +49,10 @@ html:not(.dark) #navbar-transition-maple {
 }
 
 /* ──────────────────────────────────────────────────────────────────────────
-   Desktop Navbar Actions: Dock GitHub and Launch App to Top-Right Header
+   Desktop Navbar Actions: Clean Monad-Style Minimal Text Links (Blog ↗ / Try Monad ↗)
    ────────────────────────────────────────────────────────────────────────── */
 @media (min-width: 1024px) {
-  /* Lift sidebar above navbar-transition-maple (z-20) so docked actions are visible and clickable */
+  /* Lift sidebar stacking context above navbar-transition-maple (z-20) */
   nav#sidebar {
     z-index: 35 !important;
   }
@@ -68,12 +68,13 @@ html:not(.dark) #navbar-transition-maple {
     display: flex !important;
     flex-direction: row !important;
     align-items: center !important;
-    gap: 0.75rem !important;
+    gap: 1.5rem !important;
     border: none !important;
     background: transparent !important;
     padding: 0 !important;
     z-index: 50 !important;
     margin: 0 !important;
+    box-shadow: none !important;
   }
 
   #sidebar > ul > li {
@@ -82,66 +83,75 @@ html:not(.dark) #navbar-transition-maple {
     margin: 0 !important;
     padding: 0 !important;
     scroll-margin: 0 !important;
+    border: none !important;
+    background: transparent !important;
   }
 
   #sidebar > ul a {
-    padding: 0.35rem 0.85rem !important;
-    border-radius: 0.5rem !important;
-    font-size: 0.825rem !important;
+    padding: 0 !important;
+    background: transparent !important;
+    border: none !important;
+    border-radius: 0 !important;
+    font-size: 0.875rem !important; /* 14px */
     font-weight: 500 !important;
     display: inline-flex !important;
     align-items: center !important;
     gap: 0.35rem !important;
-    line-height: 1.25 !important;
+    line-height: 1 !important;
     text-decoration: none !important;
-    transition: all 0.15s ease !important;
+    box-shadow: none !important;
+    transition: color 0.15s ease !important;
   }
 
-  /* Dark mode links */
+  /* Dark mode: clean muted text matching Monad (Image 2) */
   html.dark #sidebar > ul a {
-    background: rgba(255, 255, 255, 0.06) !important;
-    border: 1px solid rgba(255, 255, 255, 0.12) !important;
-    color: #e4e4e7 !important;
+    background: transparent !important;
+    border: none !important;
+    color: #a1a1aa !important; /* zinc-400 */
   }
 
   html.dark #sidebar > ul a:hover {
-    background: rgba(255, 255, 255, 0.12) !important;
+    background: transparent !important;
+    border: none !important;
     color: #ffffff !important;
-    border-color: rgba(255, 255, 255, 0.2) !important;
   }
 
-  /* Light mode links */
+  html.dark #sidebar > ul a svg {
+    color: #a1a1aa !important;
+    stroke: currentColor !important;
+    width: 0.75rem !important;
+    height: 0.75rem !important;
+    transition: color 0.15s ease !important;
+  }
+
+  html.dark #sidebar > ul a:hover svg {
+    color: #ffffff !important;
+    stroke: currentColor !important;
+  }
+
+  /* Light mode: clean muted text matching Monad */
   html:not(.dark) #sidebar > ul a {
-    background: rgba(0, 0, 0, 0.04) !important;
-    border: 1px solid rgba(0, 0, 0, 0.1) !important;
-    color: #27272a !important;
+    background: transparent !important;
+    border: none !important;
+    color: #71717a !important; /* zinc-500 */
   }
 
   html:not(.dark) #sidebar > ul a:hover {
-    background: rgba(0, 0, 0, 0.08) !important;
+    background: transparent !important;
+    border: none !important;
     color: #09090b !important;
-    border-color: rgba(0, 0, 0, 0.18) !important;
   }
 
-  /* Accent styling for Launch App button */
-  #sidebar > ul li[data-title*="Launch"] a,
-  #sidebar > ul li[id*="viperx.site"] a {
-    background: #FF4D26 !important;
-    color: #ffffff !important;
-    border: 1px solid #FF4D26 !important;
-    font-weight: 600 !important;
+  html:not(.dark) #sidebar > ul a svg {
+    color: #71717a !important;
+    stroke: currentColor !important;
+    width: 0.75rem !important;
+    height: 0.75rem !important;
+    transition: color 0.15s ease !important;
   }
 
-  #sidebar > ul li[data-title*="Launch"] a svg,
-  #sidebar > ul li[id*="viperx.site"] a svg {
-    color: #ffffff !important;
-    stroke: #ffffff !important;
-  }
-
-  #sidebar > ul li[data-title*="Launch"] a:hover,
-  #sidebar > ul li[id*="viperx.site"] a:hover {
-    background: #e63e18 !important;
-    border-color: #e63e18 !important;
-    opacity: 0.95 !important;
+  html:not(.dark) #sidebar > ul a:hover svg {
+    color: #09090b !important;
+    stroke: currentColor !important;
   }
 }
