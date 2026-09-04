@@ -1,5 +1,5 @@
 /* ──────────────────────────────────────────────────────────────────────────
-   ViperX Documentation Theme Styles (Monad-Style Clean Obsidian Layout)
+   ViperX Documentation Theme Styles (Monad Almond Layout & Clean Obsidian)
    ────────────────────────────────────────────────────────────────────────── */
 
 /* Dark mode: solid obsidian black background (#000000) with zero red ambient glow */
@@ -11,7 +11,8 @@ html.dark [data-docs-theme],
 html.dark #background-color,
 html.dark [id*="background-color"],
 html.dark #navbar,
-html.dark header#navbar {
+html.dark header#navbar,
+html.dark .almond-layout {
   background-color: #000000 !important;
   background: #000000 !important;
   background-image: none !important;
