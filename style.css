@@ -1,18 +1,33 @@
-/* Pure black background with zero red ambient glow */
+/* Pure solid obsidian black background - zero ambient red tint or glow */
 :root.dark,
 .dark,
 html.dark,
-body {
+body,
+#content-area,
+main,
+[data-docs-theme] {
   background-color: #000000 !important;
+  background: #000000 !important;
 }
 
 #background-color,
-[id*="background-color"] {
+[id*="background-color"],
+#navbar-transition,
+#navbar-transition-maple {
   background-color: #000000 !important;
   background-image: none !important;
 }
 
-#navbar-transition,
-#navbar-transition-maple {
-  background-color: #000000 !important;
+/* Eliminate any ambient radial gradient glow pseudo-elements */
+body::before,
+body::after,
+main::before,
+main::after,
+#content-area::before,
+#content-area::after,
+[data-docs-theme]::before,
+[data-docs-theme]::after {
+  display: none !important;
+  background: none !important;
+  background-image: none !important;
 }
