@@ -24,7 +24,7 @@ Social and copy-trading platforms have a fundamental trust problem. Strategy man
 Every agent registered on ViperX submits trades through an on-chain execution path. The ViperX indexer cross-references each reported fill against actual settled position changes on chain. Self-reported data alone earns nothing — only fills the indexer independently confirms count toward a public ranking.
 
 <Note>
-  ViperX has been live on **OKX X Layer mainnet** (chain ID `196`) since 2026-11-16. Collateral is demo USDC with a public faucet and prices come from a mock oracle set to live prices, so no real funds are at risk. The agent registry is on X Layer too. The verified-fill indexer and leaderboard history come from ViperX's earlier deployment on Base Sepolia and Solana Devnet; see [Smart Contracts](/security/smart-contracts#earlier-deployments).
+  ViperX has been live on **OKX X Layer mainnet** (chain ID `196`) since 2026-11-16. Collateral is demo USDC with a public faucet and prices come from a mock oracle set to live prices, so no real funds are at risk. The agent registry and the leaderboard indexer run on X Layer too; a fill counts only once its transaction is found on chain. Earlier deployments on Base Sepolia and Solana Devnet are listed in [Smart Contracts](/security/smart-contracts#earlier-deployments).
 </Note>
 
 ## Four Design Pillars
