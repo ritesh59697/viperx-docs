@@ -1,159 +1,151 @@
 ---
 title: "ViperX Smart Contract Addresses and On-Chain Operations"
 sidebarTitle: "Smart Contracts"
-description: "Find deployed registry contract addresses for Base Sepolia and Solana Devnet, verify your agent on-chain, and review key callable operations."
+description: "Contract addresses for the ViperX stack on OKX X Layer mainnet, the TapeOut risk circuits, proof trades, and the earlier testnet registries."
 ---
 
-Every agent identity, strategy metadata URI, and delegated execution authority in ViperX is stored directly on-chain — not in a database you have to trust. This page lists the deployed registry contracts on both supported networks, explains the key operations you interact with, and shows you how to independently verify your agent's registration status using public block explorers.
+ViperX runs on **OKX X Layer mainnet** (chain ID `196`) since 2026-11-16. The vault, the router, the risk guardian and the four TapeOut risk circuits all live on mainnet, because the TapeOut factory and processors exist only there. This page lists every deployed contract, the operations you interact with, and how to check them yourself.
 
-## Deployed Contracts
+<Note>
+  The collateral on mainnet is **demo USDC** (`MockUSDC`) with a public faucet, and prices come from a mock Pyth oracle set to live market prices. No real funds are at risk. You only need a little OKB for gas: a gated trade costs about 0.00002 OKB.
+</Note>
+
+## X Layer mainnet (chain 196)
+
+| Contract | Address | Purpose |
+|---|---|---|
+| TapeOut processor **ViperX Risk Guardian** | [`0xb57b56034e2dc25161e2512CfC40b24EA3bee1Fb`](https://www.oklink.com/xlayer/address/0xb57b56034e2dc25161e2512CfC40b24EA3bee1Fb) | Holds the four NAND risk circuits, IDs 1–4 |
+| `ViperVault` | [`0x8ad53FB549707686c1D6484119Fb2D5842A83229`](https://www.oklink.com/xlayer/address/0x8ad53FB549707686c1D6484119Fb2D5842A83229) | Non-custodial collateral, positions and margin |
+| `PositionRouter` | [`0xEe8888BDd3d6a2B3F17173773511D151b74961d6`](https://www.oklink.com/xlayer/address/0xEe8888BDd3d6a2B3F17173773511D151b74961d6) | Executes signed EIP-712 agent intents and trigger orders |
+| `TapeOutCircuitGuardian` | [`0x91d1aa84A3262B606DCFDb2bcf2da8889c2640B5`](https://www.oklink.com/xlayer/address/0x91d1aa84A3262B606DCFDb2bcf2da8889c2640B5) | Runs `processor.eval` on all four circuits before every trade |
+| `PythPriceAdapter` | [`0x3373C0d9A05F1dd87e912b9B7bC010d961aB599b`](https://www.oklink.com/xlayer/address/0x3373C0d9A05F1dd87e912b9B7bC010d961aB599b) | Reads oracle prices with staleness and confidence checks |
+| `MockUSDC` (faucet) | [`0x36B9e0D1b0702FC59114A87f277b836d482EaF6A`](https://www.oklink.com/xlayer/address/0x36B9e0D1b0702FC59114A87f277b836d482EaF6A) | Demo collateral; `faucet()` gives 10,000 USDC |
+| `MockPyth` (oracle) | [`0x68c59b55359Dc36D9E842e7314Da1150a964f4C7`](https://www.oklink.com/xlayer/address/0x68c59b55359Dc36D9E842e7314Da1150a964f4C7) | Demo oracle set to live prices |
+
+**Markets:** ETH-PERP, BTC-PERP, SOL-PERP, OKB-PERP, NVDA-PERP, TSLA-PERP, COIN-PERP and SPY-PERP.
+
+### Risk circuits
+
+| Circuit ID | Check | Passes when |
+|---|---|---|
+| `1` | Leverage | ≤ 20.00x |
+| `2` | Slippage | ≤ 2.00% |
+| `3` | Drawdown | ≤ 25.00% |
+| `4` | Cooldown | ≥ 10 s since the agent's last trade |
+
+How the circuits work, how inputs are encoded and how to read a rejection: [TapeOut Circuit Guardian](/security/tapeout-guardian).
+
+### Proof trades
+
+| Trade | Result | Transaction |
+|---|---|---|
+| 5x long, ETH-PERP | Passed all four circuits; position opened | [`0x146510d1…46d3ed`](https://www.oklink.com/xlayer/tx/0x146510d1aa8449a7752785c8090fde5f28daf98f4ce4341aeb91e7738046d3ed) |
+| 25x long, ETH-PERP | Reverted `CircuitRiskRejected(1)`: the leverage circuit failed | [`0x35170db2…3fd094`](https://www.oklink.com/xlayer/tx/0x35170db2344b09f3ff96146ea38a2652e4680e7abbe1b2ed46acaddad73fd094) |
+
+## Key on-chain operations
+
+<AccordionGroup>
+  <Accordion title="openPosition: a direct trade from viperx.site/trade">
+    `ViperVault.openPosition()` opens a long or short position against your deposited collateral. Before the position opens, the vault calls the circuit guardian, which evaluates all four TapeOut circuits.
+
+    **Who signs it:** Your wallet.
+
+    **What can stop it:** Any failed circuit reverts the trade with `CircuitRiskRejected(diagnosticBits)`. The vault's own checks also apply: a 25x per-market cap, a minimum position size and open-interest limits.
+  </Accordion>
+  <Accordion title="executeAgentIntent: a trade signed by an AI agent">
+    `PositionRouter.executeAgentIntent()` takes an EIP-712 intent signed by an agent's key, checks the signature and expiry, then calls `TapeOutCircuitGuardian.validateIntent()`. Only if all four circuits pass does the trade reach the vault.
+
+    **Who signs it:** The agent key signs the intent (market, side, size, collateral, max slippage price, deadline, nonce); anyone can relay it. Collateral is pulled from the agent's own address.
+
+    **What it never allows:** Withdrawals. An intent can only open a position, within the circuit limits and before its deadline. Each nonce works once.
+  </Accordion>
+  <Accordion title="faucet: claim demo collateral">
+    `MockUSDC.faucet()` mints 10,000 demo USDC to the caller. The **Faucet** button on [viperx.site/trade](https://www.viperx.site/trade) calls it for you.
+  </Accordion>
+  <Accordion title="closePosition: payout goes to the trader">
+    `ViperVault.closePosition()` settles a position and pays the collateral plus or minus PnL to the trader who opened it. Only that trader or an authorized `PositionRouter` can close it, and the payout always goes to the trader's address, never to the caller.
+  </Accordion>
+  <Accordion title="depositLiquidity and withdrawLiquidity: the counterparty pool">
+    Liquidity providers deposit USDC for vault shares and redeem their own shares. The pool is the counterparty to every position.
+  </Accordion>
+</AccordionGroup>
+
+## How to verify it yourself
+
+<Steps>
+  <Step title="Check the wiring">
+    The vault points at the guardian, and the guardian points at the processor for each check (`0` leverage, `1` slippage, `2` drawdown, `3` cooldown):
+
+    ```bash
+    cast call 0x8ad53FB549707686c1D6484119Fb2D5842A83229 "circuitGuardian()(address)" --rpc-url https://rpc.xlayer.tech
+    cast call 0x91d1aa84A3262B606DCFDb2bcf2da8889c2640B5 "circuitFor(uint8)(address,uint256,uint32)" 0 --rpc-url https://rpc.xlayer.tech
+    ```
+  </Step>
+  <Step title="Query a circuit">
+    `processor.eval` is a read call. Leverage is encoded as leverage × 100, little-endian, so 20x is `0xd007` and 25x is `0xc409`:
+
+    ```bash
+    cast call 0xb57b56034e2dc25161e2512CfC40b24EA3bee1Fb "eval(uint256,bytes)(bytes)" 1 0xd007 --rpc-url https://rpc.xlayer.tech   # 0x01, pass
+    cast call 0xb57b56034e2dc25161e2512CfC40b24EA3bee1Fb "eval(uint256,bytes)(bytes)" 1 0xc409 --rpc-url https://rpc.xlayer.tech   # 0x00, fail
+    ```
+  </Step>
+  <Step title="Trip a circuit from the app">
+    On [viperx.site/trade](https://www.viperx.site/trade), connect an OKX Wallet on X Layer, click **Faucet**, open a 5x long, then try 25x. The second order is refused by the leverage circuit and no funds move. The **Circuits** button in the top bar lists every contract above with explorer links.
+  </Step>
+</Steps>
+
+## Earlier deployments
+
+These testnet contracts came before the mainnet stack. They are kept here for reference.
 
 <Tabs>
-  <Tab title="Base Sepolia">
-    ### ViperX Agent Registry Contract
+  <Tab title="X Layer testnet (1952)">
+    The first X Layer deployment. Its vault is gated by an earlier Solidity risk check, **not** by TapeOut circuits; the mainnet stack replaces it.
 
-    The Base Sepolia registry is an EVM smart contract that stores agent identities, strategy metadata URIs, and the delegated execution authorities granted by vault owners. All agent registrations and trade records on the Base network are anchored to this contract.
+    | Contract | Address |
+    |---|---|
+    | `ViperVault` | [`0x347C8ebB8e88B2A556fb9d951469238FE6628501`](https://www.oklink.com/xlayer-test/address/0x347C8ebB8e88B2A556fb9d951469238FE6628501) |
+    | `PositionRouter` | [`0x8C58098B382b982fA78214dB8a10b0374c586932`](https://www.oklink.com/xlayer-test/address/0x8C58098B382b982fA78214dB8a10b0374c586932) |
+    | `PythPriceAdapter` | [`0xcce8dbdde8a997217CFf51c4A2076f3B9Eb44b70`](https://www.oklink.com/xlayer-test/address/0xcce8dbdde8a997217CFf51c4A2076f3B9Eb44b70) |
+    | `MockUSDC` | [`0x6046c644ea622fBa3043F35d979BAEE83339cfEe`](https://www.oklink.com/xlayer-test/address/0x6046c644ea622fBa3043F35d979BAEE83339cfEe) |
+  </Tab>
+  <Tab title="Base Sepolia">
+    ### ViperX Agent Registry
+
+    An EVM contract that stores agent identities, strategy metadata URIs and the execution authorities granted by vault owners.
 
     ```text
     0xA256D01Ca6e89c5B6bDf34F3dd68eBfF47f2C7ee
     ```
 
-    | Field | Value |
-    |---|---|
-    | **Network** | Base Sepolia (Testnet) |
-    | **Contract Name** | ViperX Agent Registry Contract |
-    | **Purpose** | Stores agent identities, strategy metadata URIs, and delegated execution authorities |
-    | **Explorer** | [View on BaseScan](https://sepolia.basescan.org/address/0xA256D01Ca6e89c5B6bDf34F3dd68eBfF47f2C7ee) |
-
-    <Tip>
-      To verify your registration, open the BaseScan link above and search for your wallet address in the contract's transaction history. Your `register_agent` call will appear as an inbound transaction.
-    </Tip>
+    [View on BaseScan](https://sepolia.basescan.org/address/0xA256D01Ca6e89c5B6bDf34F3dd68eBfF47f2C7ee)
   </Tab>
   <Tab title="Solana Devnet">
     ### ViperX Registry Anchor Program
 
-    The Solana Devnet registry is an Anchor program that handles PDA (Program Derived Address) creation, vault registration, and `record_trade` authority validation. Each agent on Solana gets a unique PDA that stores its identity and on-chain trade history.
+    An Anchor program that creates a PDA per agent, registers vaults and validates `record_trade` authority.
 
     ```text
     321hJbttyyeZ8pzisiKB93a5XdopV2N6n2gtvwrdQVRm
     ```
 
-    | Field | Value |
-    |---|---|
-    | **Network** | Solana Devnet |
-    | **Program Name** | ViperX Registry Anchor Program |
-    | **Purpose** | Handles PDA creation, vault registration, and `record_trade` authority validation |
-    | **Explorer** | [View on Solana Explorer](https://explorer.solana.com/address/321hJbttyyeZ8pzisiKB93a5XdopV2N6n2gtvwrdQVRm?cluster=devnet) |
-
-    <Tip>
-      To verify your agent on Solana, open the explorer link above and navigate to your agent's PDA address. The PDA is derived from your wallet pubkey and agent ID at registration time.
-    </Tip>
+    [View on Solana Explorer](https://explorer.solana.com/address/321hJbttyyeZ8pzisiKB93a5XdopV2N6n2gtvwrdQVRm?cluster=devnet)
   </Tab>
 </Tabs>
 
-## Key On-Chain Operations
-
-These are the four primary contract operations you interact with when using ViperX. Each call is signed by your wallet and verifiable on the respective block explorer.
+### Registry operations (Base Sepolia and Solana Devnet)
 
 <AccordionGroup>
-  <Accordion title="register_agent — Write your agent identity to the registry">
-    Calling `register_agent` creates a permanent, immutable on-chain record for your agent. It stores your agent ID, display name, strategy metadata URI, and vault address in the registry contract.
-
-    **When it's called:** Once, when you deploy an agent from the [Create Agent](https://www.viperx.site/create) page.
-
-    **What it writes:**
-    - Agent ID (unique per wallet, up to 32 bytes)
-    - Display name (up to 64 bytes)
-    - Strategy URI (off-chain metadata link, up to 200 bytes)
-    - Vault address (defaults to your connected wallet if left blank)
-
-    **Who signs it:** Your wallet — this is the transaction that establishes your ownership of the agent.
+  <Accordion title="register_agent: write your agent identity">
+    Creates a permanent on-chain record with your agent ID (up to 32 bytes, unique per wallet), display name (up to 64 bytes), strategy URI (up to 200 bytes) and vault address. Signed by your wallet.
   </Accordion>
-  <Accordion title="record_trade — Record a fill on-chain">
-    `record_trade` writes a trade fill record to the registry. For a fill to count toward your verified total, the indexer must cross-reference it against actual on-chain position state — an agent cannot inflate its count by calling `record_trade` in a loop without placing real orders.
-
-    **When it's called:** After each trade fill executed by the runtime on your agent's behalf.
-
-    **Verification requirement:** The filled size must match the on-chain asset delta within ±2%, the round-trip must be at least 10 seconds, and the trade must be at least $5 USD in size.
-
-    <Warning>
-      Calling `record_trade` without a corresponding on-chain position change does not increment your verified fill count. The indexer independently confirms every fill against settled account state before it counts.
-    </Warning>
+  <Accordion title="record_trade: record a fill">
+    Writes a fill record. It counts toward your verified total only if the indexer matches it against on-chain position state: size within ±2% of the settled delta, a round trip of at least 10 seconds, and at least $5 in size.
   </Accordion>
-  <Accordion title="delegate_authority — Grant execution rights to the runtime">
-    `delegate_authority` grants the ViperX off-chain runner the right to submit trade transactions and invoke circuit breakers on your agent. It explicitly does not include withdrawal permissions.
-
-    **When it's called:** Once after `register_agent`, when you confirm your agent's delegation during setup.
-
-    **What it grants:** Trade submission and circuit-breaker authority only — scoped to your configured strategy profile.
-
-    **What it never grants:** Withdrawal rights, token transfer approvals, or the ability to move principal.
+  <Accordion title="delegate_authority: grant execution rights">
+    Grants the ViperX runtime the right to submit trades and trigger the circuit breaker for your agent. It never includes withdrawal rights, token approvals or the ability to move principal.
   </Accordion>
-  <Accordion title="authority_pause() — Emergency execution halt">
-    `authority_pause()` is an emergency circuit breaker that instantly stops all trade execution for your agent. It is invoked automatically by the runtime when it detects repeated reverts or out-of-profile trade attempts, and it can also be triggered manually from your dashboard.
-
-    **Who can invoke it:** The ViperX monitoring runtime (automatically) or you (manually from the dashboard).
-
-    **Who can unpause it:** Only the vault owner — your wallet. The ViperX team and runtime cannot resume execution on your behalf.
-
-    **What it does not affect:** Your vault balance, withdrawal rights, and the ability to inspect your trade history.
+  <Accordion title="authority_pause(): emergency halt">
+    Stops all trade execution for your agent at once. The runtime can call it automatically, or you can from your dashboard; only your wallet can unpause.
   </Accordion>
 </AccordionGroup>
-
-## How to Verify Your Agent On-Chain
-
-### Base Sepolia (BaseScan)
-
-<Steps>
-  <Step title="Open the registry contract on BaseScan">
-    Navigate to [sepolia.basescan.org/address/0xA256D01Ca6e89c5B6bDf34F3dd68eBfF47f2C7ee](https://sepolia.basescan.org/address/0xA256D01Ca6e89c5B6bDf34F3dd68eBfF47f2C7ee).
-  </Step>
-  <Step title="Search for your wallet address">
-    Click the **Transactions** tab and filter or search for your wallet address. Your `register_agent` call will appear as an inbound transaction with a matching timestamp.
-  </Step>
-  <Step title="Inspect individual trade records">
-    Each `record_trade` call also appears in the contract's transaction list. Cross-reference the transaction hash with your agent's verified fill count on the leaderboard or agent profile page.
-  </Step>
-</Steps>
-
-### Solana Devnet (Solana Explorer)
-
-<Steps>
-  <Step title="Find your agent's PDA address">
-    Your agent PDA address is shown on your agent profile page. Copy it to your clipboard.
-  </Step>
-  <Step title="Open the PDA on Solana Explorer">
-    Go to [explorer.solana.com](https://explorer.solana.com/?cluster=devnet) (Devnet cluster), paste your PDA address into the search bar, and open the account.
-  </Step>
-  <Step title="Inspect account data and transactions">
-    The account data tab shows your stored agent metadata. The transactions tab lists every `record_trade` and `authority_pause` call associated with your agent.
-  </Step>
-</Steps>
-
-## Indexer and Runtime Status
-
-The ViperX indexer continuously syncs blocks from both networks and cross-references trade fills against settled position state. Current infrastructure status:
-
-<CardGroup cols={3}>
-  <Card title="Base Indexer" icon="cube">
-    **Status:** SYNCED
-
-    **Block Height:** #12,948,123
-
-    Monitoring all registry events and verifying fills on Base Sepolia.
-  </Card>
-  <Card title="Solana Indexer" icon="cube">
-    **Status:** SYNCED
-
-    **Slot Height:** #284,192,41
-
-    Monitoring all Anchor program events and PDA state changes on Solana Devnet.
-  </Card>
-  <Card title="Execution Runtime" icon="bolt">
-    **Status:** ACTIVE
-
-    **Polling Tick Rate:** 15 seconds
-
-    Processing strategy ticks and submitting trade transactions across both networks.
-  </Card>
-</CardGroup>

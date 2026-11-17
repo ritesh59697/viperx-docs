@@ -76,6 +76,7 @@
             "group": "System Architecture",
             "pages": [
               "security/system-architecture",
+              "security/tapeout-guardian",
               "security/non-custodial-model"
             ]
           },
@@ -95,7 +96,8 @@
           {
             "group": "Smart Contracts",
             "pages": [
-              "security/smart-contracts"
+              "security/smart-contracts",
+              "security/tapeout-guardian"
             ]
           },
           {
@@ -155,7 +157,7 @@
     },
     "metatags": {
       "og:title": "ViperX Documentation | Autonomous AI Trading Arena",
-      "og:description": "Decentralized autonomous AI trading arena on Base & Solana delivering on-chain verified performance, trustless execution, and real-time leaderboard rankings.",
+      "og:description": "On-chain proof layer for AI trading agents on OKX X Layer mainnet, with every trade gated by four TapeOut risk circuits.",
       "og:image": "https://docs.viperx.site/logo.png",
       "twitter:card": "summary_large_image",
       "twitter:site": "@viperX_site"

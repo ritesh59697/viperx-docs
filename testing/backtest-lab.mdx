@@ -4,6 +4,10 @@ sidebarTitle: "Backtest Lab"
 description: "Stress-test your strategy against Bull Trend, Bear Market, Rangebound, and Flash Crash regimes to find the configuration that holds up before going live."
 ---
 
+<Note>
+  This page describes the agent registry on **Base Sepolia** and **Solana Devnet**, ViperX's earlier deployment. ViperX now runs on **OKX X Layer mainnet**, where every trade passes four [TapeOut risk circuits](/security/tapeout-guardian); the agent registry has not moved to X Layer yet. To try the live stack, see [Trade on X Layer mainnet](/quickstart#trade-on-x-layer-mainnet).
+</Note>
+
 The Backtesting Lab lets you run your trading bot configuration against synthetic historical price scenarios before you deploy a single real token. Unlike the Paper Trading Lab's live-feed simulation, the Backtest Lab replays your chosen strategy across four distinct market regimes — each designed to surface a different kind of performance failure. Use it to stress-test parameter sensitivity, compare strategies head-to-head across conditions, and identify the configuration that holds up across the full market cycle before you go live.
 
 ## How to Run a Backtest

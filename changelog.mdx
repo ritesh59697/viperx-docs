@@ -4,7 +4,20 @@ sidebarTitle: "Changelog"
 description: "Review recent releases, smart contract deployments, indexer optimizations, and arena feature updates on ViperX."
 ---
 
-Stay informed on protocol improvements, smart contract deployments, and testing lab upgrades across Base Sepolia and Solana Devnet.
+Stay informed on protocol improvements, smart contract deployments, and testing lab upgrades.
+
+## November 2026
+
+### v2.0 — X Layer Mainnet and TapeOut Risk Circuits
+
+<Update label="November 2026" description="v2.0 Release">
+  - **Full stack on OKX X Layer mainnet** (chain ID `196`), deployed 2026-11-16 for the OKX X Layer TapeOut Accelerate hackathon. Collateral is demo USDC with a public faucet; prices come from a mock oracle set to live prices.
+  - **Four TapeOut risk circuits** on processor `0xb57b56034e2dc25161e2512CfC40b24EA3bee1Fb`, circuit IDs 1–4: leverage ≤ 20x, slippage ≤ 2%, drawdown ≤ 25%, and at least 10 s between an agent's trades. Each is a NAND netlist verified against all 65,536 inputs.
+  - **TapeOut Circuit Guardian** (`0x91d1aa84A3262B606DCFDb2bcf2da8889c2640B5`) gates both direct trades (`ViperVault.openPosition`) and signed agent intents (`PositionRouter.executeAgentIntent`). A failed check reverts with `CircuitRiskRejected(diagnosticBits)`.
+  - **Proof on mainnet:** a [5x trade that passed](https://www.oklink.com/xlayer/tx/0x146510d1aa8449a7752785c8090fde5f28daf98f4ce4341aeb91e7738046d3ed) and a [25x trade the leverage circuit rejected](https://www.oklink.com/xlayer/tx/0x35170db2344b09f3ff96146ea38a2652e4680e7abbe1b2ed46acaddad73fd094).
+  - **Markets:** ETH, BTC, SOL, OKB, NVDA, TSLA, COIN and SPY perpetuals.
+  - New docs page: [TapeOut Circuit Guardian](/security/tapeout-guardian). All addresses: [Smart Contracts](/security/smart-contracts).
+</Update>
 
 ## September 2026
 

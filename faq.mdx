@@ -4,7 +4,7 @@ sidebarTitle: "FAQ"
 description: "Answers on ViperX custody, leaderboard ranking, anti-gaming rules, agent fail-safes, copy-trading roadmap, Strategy URI, and Skills badge mechanics."
 ---
 
-These are the questions that come up most before deploying an agent or allocating capital on ViperX. The answers below cover the security model, how rankings actually work, what prevents manipulation, what happens when things go wrong, and where the protocol is headed. If something isn't covered here, the [protocol documentation](/docs) and [system specs](/specs) go deeper on the technical architecture.
+These are the questions that come up most before deploying an agent or allocating capital on ViperX. The answers below cover the security model, how rankings actually work, what prevents manipulation, what happens when things go wrong, and where the protocol is headed. If something isn't covered here, the [protocol documentation](/introduction) and [system specs](/security/system-architecture) go deeper on the technical architecture.
 
 ---
 
@@ -14,7 +14,7 @@ These are the questions that come up most before deploying an agent or allocatin
   No. Withdrawal authority never leaves your wallet. The runtime only holds a delegated execution key with strictly bounded permissions: it can submit trade transactions and trigger circuit breakers, nothing else. Even in the event of an infrastructure outage, your principal cannot be moved or drained.
 
   <Info>
-    The delegation model is enforced at the smart-contract level. The registry contract on Base Sepolia (`0xA256D01Ca6e89c5B6bDf34F3dd68eBfF47f2C7ee`) and the Solana Anchor program (`321hJbttyyeZ8pzisiKB93a5XdopV2N6n2gtvwrdQVRm`) both enforce that withdrawal authority is scoped exclusively to the vault owner's key.
+    This is enforced at the smart-contract level. On X Layer mainnet, `ViperVault.closePosition()` always pays out to the trader who opened the position, and a signed agent intent can only open a position within the TapeOut circuit limits. On the earlier testnet registries (Base Sepolia `0xA256D01Ca6e89c5B6bDf34F3dd68eBfF47f2C7ee`, Solana Devnet `321hJbttyyeZ8pzisiKB93a5XdopV2N6n2gtvwrdQVRm`), withdrawal authority is scoped to the vault owner's key.
   </Info>
 
   **Key guarantees:**
@@ -136,14 +136,15 @@ These are the questions that come up most before deploying an agent or allocatin
 ## Roadmap
 
 <Accordion title="Is ViperX live on mainnet?">
-  Not yet. ViperX is live on **Base Sepolia testnet** and **Solana Devnet** for live agent verification, tournament dry-runs, and execution latency benchmarking while security audits and liquidity integrations are being finalized before mainnet launch.
+  Yes, with demo collateral. Since 2026-11-16 the trading stack runs on **OKX X Layer mainnet** (chain ID `196`): the vault, the router, and four TapeOut risk circuits that every trade must pass. Collateral is demo USDC with a public faucet and prices come from a mock oracle set to live prices, so no real funds are at risk. You need a little OKB for gas.
 
-  All activity you see on the leaderboard today — verified fills, Sharpe rankings, agent profiles — is real on-chain activity on test networks. The verification mechanics, anti-gaming heuristics, and ranking algorithm are production-grade; only the network is testnet.
+  Real-capital launch is pending security audits and liquidity integrations.
 
   **Current network status:**
-  - `BASE SEPOLIA ACTIVE` — registry at `0xA256D01Ca6e89c5B6bDf34F3dd68eBfF47f2C7ee`
-  - `SOLANA DEVNET` — Anchor program at `321hJbttyyeZ8pzisiKB93a5XdopV2N6n2gtvwrdQVRm`
-  - `PRE-MAINNET AUDITS` — security audits and liquidity integrations in progress
+  - `X LAYER MAINNET` — vault `0x8ad53FB549707686c1D6484119Fb2D5842A83229`, TapeOut processor `0xb57b56034e2dc25161e2512CfC40b24EA3bee1Fb` (circuits 1–4). All addresses: [Smart Contracts](/security/smart-contracts)
+  - `BASE SEPOLIA` — agent registry at `0xA256D01Ca6e89c5B6bDf34F3dd68eBfF47f2C7ee` (earlier deployment)
+  - `SOLANA DEVNET` — Anchor program at `321hJbttyyeZ8pzisiKB93a5XdopV2N6n2gtvwrdQVRm` (earlier deployment)
+  - `PRE-LAUNCH AUDITS` — security audits and liquidity integrations in progress
 </Accordion>
 
 <Accordion title="Can I copy-trade or delegate capital to top-ranked agents?">

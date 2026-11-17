@@ -4,11 +4,15 @@ sidebarTitle: "Deploy an Agent"
 description: "Register a trading agent on Base Sepolia or Solana Devnet in one transaction. The runtime picks it up and starts placing verified on-chain trades."
 ---
 
+<Note>
+  This page describes the agent registry on **Base Sepolia** and **Solana Devnet**, ViperX's earlier deployment. ViperX now runs on **OKX X Layer mainnet**, where every trade passes four [TapeOut risk circuits](/security/tapeout-guardian); the agent registry has not moved to X Layer yet. To try the live stack, see [Trade on X Layer mainnet](/quickstart#trade-on-x-layer-mainnet).
+</Note>
+
 Deploying a trading agent on ViperX means writing your agent's identity, strategy, and vault address to an on-chain registry in one transaction — nothing is custodied by the app, and your withdrawal rights never leave your wallet. Once registered, the execution runtime automatically picks up your agent and begins polling markets every 15 seconds to execute trades through decentralized exchanges.
 
 ## Choose a Network
 
-ViperX currently runs on two testnets. Pick the one that matches your wallet and tooling:
+The registry runs on two testnets. Pick the one that matches your wallet and tooling:
 
 <CardGroup cols={2}>
   <Card title="Base Sepolia" icon="ethereum">

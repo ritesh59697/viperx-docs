@@ -1,10 +1,35 @@
 ---
-title: "Deploy Your First AI Trading Agent on ViperX"
+title: "Quick Start: Trade on X Layer and Deploy an Agent"
 sidebarTitle: "Quick Start"
-description: "Connect your wallet, choose a strategy engine, configure your agent parameters, and sign one transaction to deploy a verified on-chain AI trading agent."
+description: "Trip a TapeOut risk circuit on X Layer mainnet in five minutes, then register an AI trading agent on the earlier testnet registry."
 ---
 
-Deploying an agent on ViperX takes a single on-chain transaction. Once registered, the ViperX execution runtime picks up your agent automatically, begins trading against the configured market, and the indexer starts tracking verified fills toward your leaderboard ranking. This guide walks you through every step from wallet setup to monitoring your first trades.
+This guide has two parts. First, trade on OKX X Layer mainnet and watch a TapeOut risk circuit accept one order and reject another. Then, register an agent on the earlier testnet registry, where the execution runtime picks it up and the indexer tracks verified fills toward a leaderboard ranking.
+
+## Trade on X Layer mainnet
+
+The live ViperX stack runs on **OKX X Layer mainnet** (chain ID `196`). You can watch a TapeOut circuit gate a real trade in about five minutes:
+
+<Steps>
+  <Step title="Connect a wallet on X Layer">
+    Open [viperx.site/trade](https://www.viperx.site/trade) and click **Connect Wallet to Trade**. Use OKX Wallet (or any EVM wallet) on X Layer mainnet, with a little OKB for gas. A gated trade costs about 0.00002 OKB.
+  </Step>
+  <Step title="Claim demo USDC">
+    Click **Faucet** to receive 10,000 demo USDC. The collateral is a demo token, so no real funds are at risk.
+  </Step>
+  <Step title="Open a trade that passes">
+    Set leverage to **5x** and click **Buy / Long ETH**. The trade passes all four circuits and the position opens.
+  </Step>
+  <Step title="Open a trade the circuit rejects">
+    Set leverage to **25x** and click **Buy / Long ETH** again. The order is refused with *"blocked by the on-chain risk circuits: leverage check failed"*, and no funds move.
+  </Step>
+</Steps>
+
+Click **Circuits** in the top bar to see the vault, router, guardian and processor with explorer links. How the gate works: [TapeOut Circuit Guardian](/security/tapeout-guardian).
+
+## Deploy an agent on the earlier testnets
+
+The steps below register an agent on **Base Sepolia** or **Solana Devnet**, ViperX's earlier deployment. The agent registry has not moved to X Layer yet.
 
 <Tip>
   Before committing testnet funds, consider validating your strategy in the [Paper Trading Lab](/testing/paper-trading) first. It runs against a live simulated price feed with a virtual $10,000 balance and zero on-chain transactions, so you can see how your chosen engine behaves before deployment.
@@ -18,7 +43,7 @@ Before you begin, make sure you have:
 - **Testnet gas funds** — Base Sepolia ETH from the [Base Sepolia faucet](https://www.coinbase.com/faucets/base-ethereum-goerli-faucet), or Devnet SOL from the [Solana faucet](https://faucet.solana.com).
 
 <Note>
-  ViperX is on **testnet only**. You do not need real ETH or SOL — only testnet tokens available free from official faucets.
+  The registry is on **testnets only**. You do not need real ETH or SOL — only testnet tokens available free from official faucets.
 </Note>
 
 ## Deploy Your Agent
