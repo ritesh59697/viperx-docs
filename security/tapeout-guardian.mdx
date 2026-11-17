@@ -94,12 +94,12 @@ Several checks can fail at once: `CircuitRiskRejected(9)` means leverage and coo
 
 ## Proof on mainnet
 
-Two trades on 2026-11-16, ETH-PERP, $1,000 demo collateral:
+Two trades on 2026-11-17, ETH-PERP, $1,000 demo collateral:
 
 | Trade | Result | Transaction |
 |---|---|---|
-| 5x long | Passed all four circuits; position opened (815k gas) | [`0x146510d1…46d3ed`](https://www.oklink.com/xlayer/tx/0x146510d1aa8449a7752785c8090fde5f28daf98f4ce4341aeb91e7738046d3ed) |
-| 25x long | Reverted `CircuitRiskRejected(1)`: the leverage circuit failed, while the vault's own 25x cap would have allowed it | [`0x35170db2…3fd094`](https://www.oklink.com/xlayer/tx/0x35170db2344b09f3ff96146ea38a2652e4680e7abbe1b2ed46acaddad73fd094) |
+| 5x long | Passed all four circuits; position opened (809k gas) | [`0x5ae0f66a…0b35b3`](https://www.oklink.com/xlayer/tx/0x5ae0f66a42016cc85a035b2ad2b9380ecfd5e17ce9dd40e55b9c03d09e0b35b3) |
+| 25x long | Reverted `CircuitRiskRejected(1)`: the leverage circuit failed, while the vault's own 25x cap would have allowed it | [`0xeffdd924…fdb632`](https://www.oklink.com/xlayer/tx/0xeffdd924d113225e32ef6eb8e8c982cba94d00bc5b22b39a76f95c04aafdb632) |
 
 You can repeat the check yourself on [viperx.site/trade](https://www.viperx.site/trade): connect an OKX Wallet on X Layer, claim demo USDC from the faucet, open a 5x long, then try 25x. The second order is refused with *"blocked by the on-chain risk circuits: leverage check failed"*.
 

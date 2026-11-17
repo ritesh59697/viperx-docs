@@ -15,13 +15,17 @@ ViperX runs on **OKX X Layer mainnet** (chain ID `196`) since 2026-11-16. The va
 | Contract | Address | Purpose |
 |---|---|---|
 | TapeOut processor **ViperX Risk Guardian** | [`0xb57b56034e2dc25161e2512CfC40b24EA3bee1Fb`](https://www.oklink.com/xlayer/address/0xb57b56034e2dc25161e2512CfC40b24EA3bee1Fb) | Holds the four NAND risk circuits, IDs 1–4 |
-| `ViperVault` | [`0x8ad53FB549707686c1D6484119Fb2D5842A83229`](https://www.oklink.com/xlayer/address/0x8ad53FB549707686c1D6484119Fb2D5842A83229) | Non-custodial collateral, positions and margin |
-| `PositionRouter` | [`0xEe8888BDd3d6a2B3F17173773511D151b74961d6`](https://www.oklink.com/xlayer/address/0xEe8888BDd3d6a2B3F17173773511D151b74961d6) | Executes signed EIP-712 agent intents and trigger orders |
-| `TapeOutCircuitGuardian` | [`0x91d1aa84A3262B606DCFDb2bcf2da8889c2640B5`](https://www.oklink.com/xlayer/address/0x91d1aa84A3262B606DCFDb2bcf2da8889c2640B5) | Runs `processor.eval` on all four circuits before every trade |
+| `ViperVault` | [`0x0e36c7fE3B20b1c33B1691E7041A80ad50e77Bdc`](https://www.oklink.com/xlayer/address/0x0e36c7fE3B20b1c33B1691E7041A80ad50e77Bdc) | Non-custodial collateral, positions and margin |
+| `PositionRouter` | [`0x280d21b19A504BDEf95CFd1Aa9492f03EE4e7135`](https://www.oklink.com/xlayer/address/0x280d21b19A504BDEf95CFd1Aa9492f03EE4e7135) | Executes signed EIP-712 agent intents and trigger orders |
+| `TapeOutCircuitGuardian` | [`0x54FaE0b57646365c6e4631E06dFe3d314BA0206A`](https://www.oklink.com/xlayer/address/0x54FaE0b57646365c6e4631E06dFe3d314BA0206A) | Runs `processor.eval` on all four circuits before every trade |
 | `PythPriceAdapter` | [`0x3373C0d9A05F1dd87e912b9B7bC010d961aB599b`](https://www.oklink.com/xlayer/address/0x3373C0d9A05F1dd87e912b9B7bC010d961aB599b) | Reads oracle prices with staleness and confidence checks |
 | Agent `Registry` | [`0x0991750A3196BF56f355aE18C1cec841DbF3a338`](https://www.oklink.com/xlayer/address/0x0991750A3196BF56f355aE18C1cec841DbF3a338) | Agent identities registered from viperx.site/create |
 | `MockUSDC` (faucet) | [`0x36B9e0D1b0702FC59114A87f277b836d482EaF6A`](https://www.oklink.com/xlayer/address/0x36B9e0D1b0702FC59114A87f277b836d482EaF6A) | Demo collateral; `faucet()` gives 10,000 USDC |
 | `MockPyth` (oracle) | [`0x68c59b55359Dc36D9E842e7314Da1150a964f4C7`](https://www.oklink.com/xlayer/address/0x68c59b55359Dc36D9E842e7314Da1150a964f4C7) | Demo oracle set to live prices |
+
+<Note>
+  The vault, router and guardian were redeployed on 2026-11-17 so that positions opened from signed agent intents belong to the agent (`ViperVault.openPositionFor`). The processor and circuits did not change. The first vault, [`0x8ad5…3229`](https://www.oklink.com/xlayer/address/0x8ad53FB549707686c1D6484119Fb2D5842A83229), keeps the original proof trades.
+</Note>
 
 **Markets:** ETH-PERP, BTC-PERP, SOL-PERP, OKB-PERP, NVDA-PERP, TSLA-PERP, COIN-PERP and SPY-PERP.
 
@@ -40,8 +44,8 @@ How the circuits work, how inputs are encoded and how to read a rejection: [Tape
 
 | Trade | Result | Transaction |
 |---|---|---|
-| 5x long, ETH-PERP | Passed all four circuits; position opened | [`0x146510d1…46d3ed`](https://www.oklink.com/xlayer/tx/0x146510d1aa8449a7752785c8090fde5f28daf98f4ce4341aeb91e7738046d3ed) |
-| 25x long, ETH-PERP | Reverted `CircuitRiskRejected(1)`: the leverage circuit failed | [`0x35170db2…3fd094`](https://www.oklink.com/xlayer/tx/0x35170db2344b09f3ff96146ea38a2652e4680e7abbe1b2ed46acaddad73fd094) |
+| 5x long, ETH-PERP | Passed all four circuits; position opened | [`0x5ae0f66a…0b35b3`](https://www.oklink.com/xlayer/tx/0x5ae0f66a42016cc85a035b2ad2b9380ecfd5e17ce9dd40e55b9c03d09e0b35b3) |
+| 25x long, ETH-PERP | Reverted `CircuitRiskRejected(1)`: the leverage circuit failed | [`0xeffdd924…fdb632`](https://www.oklink.com/xlayer/tx/0xeffdd924d113225e32ef6eb8e8c982cba94d00bc5b22b39a76f95c04aafdb632) |
 
 ## Key on-chain operations
 
@@ -57,6 +61,8 @@ How the circuits work, how inputs are encoded and how to read a rejection: [Tape
     `PositionRouter.executeAgentIntent()` takes an EIP-712 intent signed by an agent's key, checks the signature and expiry, then calls `TapeOutCircuitGuardian.validateIntent()`. Only if all four circuits pass does the trade reach the vault.
 
     **Who signs it:** The agent key signs the intent (market, side, size, collateral, max slippage price, deadline, nonce); anyone can relay it. Collateral is pulled from the agent's own address.
+
+    **Who owns the position:** The agent. The router pays the vault with the agent's collateral and calls `ViperVault.openPositionFor(agent, …)`, which only an authorized router may call, so the position key, the `PositionOpened` event, closing rights and the payout all belong to the agent.
 
     **What it never allows:** Withdrawals. An intent can only open a position, within the circuit limits and before its deadline. Each nonce works once.
   </Accordion>
@@ -78,8 +84,8 @@ How the circuits work, how inputs are encoded and how to read a rejection: [Tape
     The vault points at the guardian, and the guardian points at the processor for each check (`0` leverage, `1` slippage, `2` drawdown, `3` cooldown):
 
     ```bash
-    cast call 0x8ad53FB549707686c1D6484119Fb2D5842A83229 "circuitGuardian()(address)" --rpc-url https://rpc.xlayer.tech
-    cast call 0x91d1aa84A3262B606DCFDb2bcf2da8889c2640B5 "circuitFor(uint8)(address,uint256,uint32)" 0 --rpc-url https://rpc.xlayer.tech
+    cast call 0x0e36c7fE3B20b1c33B1691E7041A80ad50e77Bdc "circuitGuardian()(address)" --rpc-url https://rpc.xlayer.tech
+    cast call 0x54FaE0b57646365c6e4631E06dFe3d314BA0206A "circuitFor(uint8)(address,uint256,uint32)" 0 --rpc-url https://rpc.xlayer.tech
     ```
   </Step>
   <Step title="Query a circuit">
