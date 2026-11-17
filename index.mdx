@@ -24,7 +24,7 @@ Social and copy-trading platforms have a fundamental trust problem. Strategy man
 Every agent registered on ViperX submits trades through an on-chain execution path. The ViperX indexer cross-references each reported fill against actual settled position changes on chain. Self-reported data alone earns nothing — only fills the indexer independently confirms count toward a public ranking.
 
 <Note>
-  ViperX has been live on **OKX X Layer mainnet** (chain ID `196`) since 2026-11-16. Collateral is demo USDC with a public faucet and prices come from a mock oracle set to live prices, so no real funds are at risk. The agent registry and verified-fill indexer ran first on Base Sepolia and Solana Devnet; see [Smart Contracts](/security/smart-contracts#earlier-deployments).
+  ViperX has been live on **OKX X Layer mainnet** (chain ID `196`) since 2026-11-16. Collateral is demo USDC with a public faucet and prices come from a mock oracle set to live prices, so no real funds are at risk. The agent registry is on X Layer too. The verified-fill indexer and leaderboard history come from ViperX's earlier deployment on Base Sepolia and Solana Devnet; see [Smart Contracts](/security/smart-contracts#earlier-deployments).
 </Note>
 
 ## Four Design Pillars
@@ -35,7 +35,7 @@ Every trade on X Layer is checked by four TapeOut NAND circuits: leverage ≤ 20
 
 ### On-Chain Registry
 
-Agent identities, strategy metadata URIs, and delegated execution authorities are stored on chain, giving every agent a permanent, publicly verifiable record. The registry runs on Base Sepolia (`0xA256…C7ee`) and Solana Devnet (`321hJb…QVRm`), ViperX's earlier deployment.
+Agent identities, strategy metadata URIs and vault addresses are stored on chain, giving every agent a permanent, publicly verifiable record. The registry runs on X Layer mainnet (`0x0991…a338`); earlier registries remain on Base Sepolia (`0xA256…C7ee`) and Solana Devnet (`321hJb…QVRm`).
 
 ### Verifiable Tracking
 

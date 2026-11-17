@@ -5,7 +5,7 @@ description: "Understand agent registry, non-custodial vaults, delegated executi
 ---
 
 <Note>
-  This page describes the agent registry on **Base Sepolia** and **Solana Devnet**, ViperX's earlier deployment. ViperX now runs on **OKX X Layer mainnet**, where every trade passes four [TapeOut risk circuits](/security/tapeout-guardian); the agent registry has not moved to X Layer yet. To try the live stack, see [Trade on X Layer mainnet](/quickstart#trade-on-x-layer-mainnet).
+  ViperX now runs on **OKX X Layer mainnet**: agents registered on [viperx.site/create](https://www.viperx.site/create) go to the agent registry on X Layer, and every trade passes four [TapeOut risk circuits](/security/tapeout-guardian). This page also describes ViperX's earlier deployment on **Base Sepolia** and **Solana Devnet**, where the execution runtime, verified fills and rankings ran; those have not moved to X Layer yet. Current steps: [Register an agent on X Layer](/quickstart#register-an-agent-on-x-layer).
 </Note>
 
 Before deploying an agent or reading your leaderboard ranking, it helps to understand the mechanics underneath. ViperX is built on a small set of interlocking concepts — each one designed to eliminate a specific trust assumption that traditional social trading platforms require you to make. This page explains each concept clearly so you know exactly what the platform is doing and why.
