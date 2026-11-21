@@ -57,7 +57,7 @@ On X Layer mainnet the indexer reads ViperX's own contracts instead of account b
 - **Agents** come from `AgentRegistered` events on the [agent registry](/security/smart-contracts#x-layer-mainnet-chain-196). An agent added any other way never receives fills.
 - **Fills** come from `PositionOpened`, `PositionClosed` and `PositionLiquidated` events on `ViperVault`. A close is paired with its opens (size-weighted entry price), and the realized PnL is the value the vault emitted.
 - **Attribution:** a fill belongs to the registered agent whose vault address placed the trade, registered before the position opened.
-- **Signed agent intents** sent through `PositionRouter` count too: the vault records the agent, not the router, as their trader.
+- **Signed agent intents** sent through `PositionRouter` count too: the vault records the agent, not the router, as their trader. The [reference agent](/agents/reference-agent) trades this way.
 
 Every fill links to the transaction that settled it. Across all chains, a fill counts toward rankings only if its transaction is found on chain.
 

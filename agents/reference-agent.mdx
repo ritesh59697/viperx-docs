@@ -1,0 +1,73 @@
+---
+title: "The ViperX Reference Agent on X Layer Mainnet"
+sidebarTitle: "Reference Agent"
+description: "A public momentum agent that trades ViperX on X Layer mainnet through signed EIP-712 intents, so every open passes the four TapeOut risk circuits and lands on the leaderboard as a verified fill."
+---
+
+The reference agent is a small, public trading agent that ViperX runs on **X Layer mainnet** (chain `196`). It shows the whole path working end to end: an agent registered on chain signs its own trades, every open is checked by the [four TapeOut risk circuits](/security/tapeout-guardian), and each closed position is counted by the leaderboard indexer as a [verified fill](/leaderboard/verified-fills#verified-fills-on-x-layer).
+
+| | |
+|---|---|
+| Agent ID | `viperx-momentum-1` |
+| Name | ViperX Momentum (reference agent) |
+| Agent address | [`0x9f718b338Ccc69B6AC211Dc8239548E43095813a`](https://www.oklink.com/xlayer/address/0x9f718b338Ccc69B6AC211Dc8239548E43095813a) |
+| Registration | [`0xa818dbf2…532b94`](https://www.oklink.com/xlayer/tx/0xa818dbf23a950f2f8e0692c3b834adfff94757dd8a739a10ae2a1bdc11532b94) on the [agent registry](/security/smart-contracts#x-layer-mainnet-chain-196), 2026-11-21 |
+| Live profile | [viperx.site/agents/0x7872…ad4](https://www.viperx.site/agents/0x7872668b9368277bedf31917b28f442f98cbcad4) |
+
+<Note>
+  The agent trades demo USDC against a mock oracle set to live OKX prices, like every trade on the mainnet stack. No real funds are at risk; the agent pays only gas in OKB, about 0.00002 OKB per round trip (two price updates, the open and the close).
+</Note>
+
+## The strategy
+
+The strategy is deliberately simple and fully public, so its fills say something about the plumbing rather than about a secret edge:
+
+1. Sample the live ETH-USDT price from the OKX ticker API every 30 seconds.
+2. Every 5 minutes, compare the latest price with the price six samples (3 minutes) earlier. Go **long** if it rose, **short** if it fell.
+3. Open 3x on `ETH-PERP` with $100 of demo collateral, then close the position 3 minutes later.
+4. Repeat until 55 fills are closed, which spans about 4.6 hours: above the 50-fill minimum for a [ranked agent](/leaderboard/how-ranking-works) and the [4-hour minimum span](/leaderboard/anti-gaming#summary-what-gets-an-agent-flagged) for those fills.
+
+## What happens on chain in one cycle
+
+<Steps>
+  <Step title="Push the live price">
+    The agent writes the current OKX price to the demo oracle (`MockPyth.setPrice`), so the trade settles at the real market price, not at the price from deploy time. Only the oracle's owner can do this, which is why the reference agent runs from the deployer address.
+  </Step>
+  <Step title="Sign an intent">
+    The agent signs an EIP-712 intent: market, side, size, collateral, the worst acceptable price (0.5% from the live price), a 2-minute deadline and a fresh nonce.
+  </Step>
+  <Step title="Execute through the router">
+    `PositionRouter.executeAgentIntent()` checks the signature, deadline and nonce, then calls the [TapeOut Circuit Guardian](/security/tapeout-guardian). The guardian runs `processor.eval` on all four circuits: leverage, slippage, drawdown and cooldown. If any fails, the trade reverts with `CircuitRiskRejected(diagnosticBits)` and no collateral moves.
+  </Step>
+  <Step title="Open a position the agent owns">
+    The router opens the trade with `ViperVault.openPositionFor(agent, …)`, so the position, the `PositionOpened` event and the payout all belong to the agent's address, not to the router.
+  </Step>
+  <Step title="Close and settle">
+    After the hold, the agent pushes the price again and calls `ViperVault.closePosition()`. The vault emits `PositionClosed` with the realized PnL and pays collateral plus or minus PnL back to the agent.
+  </Step>
+  <Step title="Indexed as a verified fill">
+    The leaderboard indexer reads the registry and vault events, pairs each close with its open, and counts the fill only once its transaction is found on chain. Sharpe, ROI and drawdown are recomputed from verified fills alone.
+  </Step>
+</Steps>
+
+## Example fill
+
+The first round trip, on 2026-11-21:
+
+| Step | Transaction |
+|---|---|
+| Open short, ETH-PERP at $1,694.44, passed all four circuits | [`0xf3c5b9da…dd4e9b`](https://www.oklink.com/xlayer/tx/0xf3c5b9daa4d7c0280e70f1822c063942692cf2f367531785ebf7141895dd4e9b) |
+| Close at $1,693.71, PnL +$0.13 | [`0xe8d362ea…890de3`](https://www.oklink.com/xlayer/tx/0xe8d362ea616aa608f8a8b4609c9d5ecb579ad704afa364ca1385068593890de3) |
+
+The agent's full fill history, with a link to each settling transaction, is on its [live profile](https://www.viperx.site/agents/0x7872668b9368277bedf31917b28f442f98cbcad4).
+
+## How the agent is run
+
+- **Key handling:** the agent's key is decrypted from an encrypted Foundry keystore when the operator types its password. The key is passed to the agent process over stdin and held only in that process's memory; it is never written to a file, a command-line argument or an environment variable.
+- **No hardcoded values:** contract addresses come from the deployment record, market settings from the markets config, and every strategy setting is a command-line flag.
+- **Before trading,** the agent checks it owns the oracle and the market is active, closes any position it held from before registration, registers itself if needed, and approves the router to spend its collateral.
+- **Safety stops:** it stops if its OKB balance falls below a set floor or after five failed cycles in a row. Every action is written to a JSON-lines log with its transaction hash.
+
+## Run your own agent
+
+Any agent can trade the same way: register it on [viperx.site/create](https://www.viperx.site/create), fund its address with demo USDC from the faucet and a little OKB for gas, approve the `PositionRouter`, and send signed intents to `executeAgentIntent`. Your agent does not need to own the oracle. The reference agent pushes prices only so that the demo market tracks real prices while it trades.
